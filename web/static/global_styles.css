@@ -1,0 +1,90 @@
+:root {
+    --base: #6BB77B;
+    --base-dk: #172D13;
+    --base-lt: #5FF5AD;
+
+    --comp-dk: #5C1208;
+    --comp-lt: #ca4331;
+
+    --off-white: #fafafa;
+    --off-black: #212121;
+  }
+
+
+@font-face {
+    font-family: "Rowdies";
+    src: url('assets/Rowdies/Rowdies-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Rowdies";
+    src: url('assets/Rowdies/Rowdies-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Rowdies";
+    src: url('assets/Rowdies/Rowdies-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+
+h1, h2, h3, h4, h5, h6{
+    font-family: 'Rowdies', monospace;
+}
+
+
+@font-face {
+    font-family: "Space_Mono";
+    src: url('assets/Space_Mono/SpaceMono-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Space_Mono";
+    src: url('assets/Space_Mono/SpaceMono-Italic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Space_Mono";
+    src: url('assets/Space_Mono/SpaceMono-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Space_Mono";
+    src: url('assets/Space_Mono/SpaceMono-BoldItalic.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+}
+
+p{
+    font-family: 'Space_Mono', monospace;
+    font-weight: 400;
+}
+
+.bg-dk{
+    background-color: var(--base-dk);
+    color: var(--off-white);
+}
+
+.comp-btn{
+    background-color: var(--comp-lt);
+    border-color: var(--comp-lt) ;
+}
+.comp-btn:hover{
+    background-color: var(--comp-dk);
+    border-color: var(--comp-dk) ;
+}
+
+.highlight{
+    color: var(--base-lt);
+}

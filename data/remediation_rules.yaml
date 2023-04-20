@@ -1,0 +1,11 @@
+remediation policies:
+  ## List of all remediaton policies with their assosated timeframe in days
+  default:
+    severity: 0
+    timeframe: 60
+  critical:
+    severity: 8
+    timeframe: 30
+  high:
+    severity: 8
+    timeframe: 60

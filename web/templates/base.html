@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Remedicado - {% block title %}{% endblock %}</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+        <script src="/static/navbar.js"></script>
+        <link href="/static/fontawesome/css/fontawesome.css" rel="stylesheet">
+        <link href="/static/fontawesome/css/brands.css" rel="stylesheet">
+        <link href="/static/fontawesome/css/solid.css" rel="stylesheet">
+        <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/custom_bootstrap_edit.css">
+        <link rel="stylesheet" href="/static/global_styles.css">
+
+        {% block headings %}{% endblock %}
+    </head>
+
+    <body onload="Init_Nav()">
+    
+        
+        <div class="d-flex flex-row">
+            <div class="container-fluid nav-col" id="navbar">
+                <nav class="navbar navbar-expand-lg sticky-top" >
+                    <div class="container-fluid bar">
+                        <a class="navbar-brand" href="{{ url_for('Home') }}">
+                            <img src="/static/assets/Remedicado_logo.png" alt="Remedicado logo">
+                        </a>
+                        <a class="nav-open navbar-brand" href="{{ url_for('Home') }}">Remedicado</a>
+                        
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                            <ul class="navbar-nav">
+                                <li class="nav-item">
+                                    <a class="nav-link nav-open" href="{{ url_for('Home') }}">home</a>
+                                    <a class="nav-link nav-closed" href="{{ url_for('Home') }}"><i class="fa-solid fa-house nav-icon"></i></a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link nav-open" href="#">remediatons</a>
+                                    <a class="nav-link nav-closed" href="#"><i class="fa-solid fa-pen-to-square nav-icon"></i></a>
+                                </li>
+                            </ul>
+                        </div>
+
+
+                        <div class="nav-footer ">
+                            <ul class="navbar-nav">
+                                <li class="nav-item">
+                                    <a class="nav-link nav-open" style="cursor: pointer;" onclick="Expand_Nav()"> <i class="fa-solid fa-angles-left nav-icon"></i> collapse</a>
+                                    <a class="nav-link nav-closed" style="cursor: pointer;" onclick="Expand_Nav()"><i class="fa-solid fa-angles-right nav-icon"></i></a>
+                                </li>                                 
+                                <li class="nav-item ">
+                                    <a class="nav-link nav-open" href="#">sign in <i class="fa-solid fa-arrow-right-to-bracket nav-icon"></i></a>
+                                    <a class="nav-link nav-closed" href="#"><i class="fa-solid fa-arrow-right-to-bracket nav-icon"></i></a>
+                                </li>
+                            </ul>
+                        </div>
+
+
+                    </div>
+                </nav>
+            </div>
+            <div>
+                <div class="container-fluid">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        
+        
+    
+    </body>
+</html>
