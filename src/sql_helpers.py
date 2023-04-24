@@ -5,7 +5,7 @@ db = mysql.connector.connect(
     host="localhost",
     user="root",
     passwd="OfAllProblems!",
-    database="remediator"
+    database="remedicado"
 )
 mycursor = db.cursor()
 
@@ -19,7 +19,7 @@ class Helpers:
         try:
             mycursor.execute(f'''
                 SELECT ip_list_id
-                FROM remediator.ip_list
+                FROM remedicado.ip_list
                 WHERE ip_list_address=\'{Ip_Address}\';
                 ''')
             
@@ -33,17 +33,36 @@ class Helpers:
 
         if not exists:
             mycursor.execute(f'''
-                INSERT INTO remediator.ip_list (ip_list_address)
+                INSERT INTO remedicado.ip_list (ip_list_address)
                 VALUES (\'{Ip_Address}\');
                 ''')
             db.commit()
             
             mycursor.execute(f'''
                 SELECT ip_list_id
-                FROM remediator.ip_list
+                FROM remedicado.ip_list
                 WHERE ip_list_address=\'{Ip_Address}\';
                 ''')
             
             for ip_id in mycursor:
                 #print(f"Added '{Ip_Address}' to ip list with id {ip_id[0]}")
                 return ip_id[0]
+
+
+    def Sql_To_Dict(Header_list, Sql_Data):
+         
+        # header_list = cursor.description
+        # sql_data = cursor.fetchone
+
+        if Header_list is None or Sql_Data is None:
+                return
+
+        headers = []
+        for header in Header_list:
+            headers.append(header[0])
+
+        sql_dict = {}
+        for count in range(0,len(Sql_Data)):
+            sql_dict.update({headers[count]:Sql_Data[count]})
+
+        return sql_dict

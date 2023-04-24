@@ -1,0 +1,123 @@
+{% extends "base.html" %}  
+{% block title %}{{ Remediation_Name }}{% endblock %}  
+
+{% block content %}
+
+<div class="stack">
+
+    <div class="container">
+        <div class="title side-by-side">
+            <div class="return">
+                <a href="{{ url_for('Remediations_List')}}#{{ID}}"><img src="/static/assets/icons/back.svg" alt="back icon"> <h6>Remediation Details</h6></a>
+                
+            </div>
+            <h1>{{ Remediation_Name }}</h1>
+            <p><span class="bold">Reported: </span>{{Date_Added}} |  <span class="bold">Last updated: </span>{{Last_Updated}}</p>
+        </div>
+
+        {% if Remediation_Sev >= 9 %}
+        <!-- Critical severity (9+)-->
+
+        <div class="cta critical side-by-side">
+            <img src="/static/assets/icons/panicacado.svg" alt="critical severity" style="width: 12rem;">
+
+        {% elif Remediation_Sev >= 7 %}
+        <!-- High severity (7+)-->
+
+        <div class="cta high side-by-side">
+            <img src="/static/assets/icons/ripeacado.svg" alt="high severity" style="width: 12rem;">
+
+        {% elif Remediation_Sev >= 4 %}
+        <!-- medium severity (4+)-->
+
+        <div class="cta medium side-by-side">
+            <img src="/static/assets/icons/baseacado.svg" alt="medium severity" style="width: 12rem;">
+
+        {% else %}
+        <!-- low / info severity (>4)-->
+
+        <div class="cta low side-by-side">
+            <img src="/static/assets/icons/infoacado.svg" alt="low severity" style="width: 12rem;">
+        
+        {% endif %}
+
+            
+            <h3>Severity {{ Remediation_Sev }}</h3>
+
+            <div>
+                <p class="close-margin bold">Remediation Progress</p>
+                <div class="progress_border">
+                    <div class="progress_bar" style="width:{{Remediation_Percent}}%;">{{ Remediation_Ip_Count }}</div>
+                </div>
+            </div>
+            <div>
+                <p class="close-margin bold">Policy Status</p>
+                <div class="progress_border">
+                    <div class="progress_bar" style="width:100%;">Out of policy</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" >
+        <div class="hero side-by-side">
+            <h3 class="close-margin">Vulnerability Description</h3>
+            <div class="seperator"></div>
+            {% for line in Remediation_Desc %}
+            <p>{{ line }}</p>
+            {% endfor %}
+        </div>
+    
+        <div class="hero side-by-side">
+            <p>Add links to reports?></p><h3 class="close-margin">Remediation Reports</h3>
+        </div>
+    </div>
+
+    <div class="full-width">
+        <div class="cta">
+            <div class="container">
+                <div class="stack">
+                    <h2 class="close-margin">Export Remediation Report</h2>
+                    <div>
+                        <button type="button" class="btn">Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero">
+        <h3 class="close-margin">Ip List</h3>
+        <table style="table-layout: auto;">
+            <tr>
+                {% for header in Ip_Headers %}
+                <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in Ip_Data %}
+            <tr>
+
+                <td class="header-column">{{Ip_Data[row]['ip_list_address']}}</td>
+                <td>{{Ip_Data[row]['date_reported']}}</td>
+                
+                {% if Ip_Data[row]['remediated'] == 1 %}
+                <td><span class="true">Yes</span></td>
+                {% else %}
+                <td><span class="false">No</span></td>
+                {% endif %}
+
+                <td>{{Ip_Data[row]['last_seen']}}</td>
+                {% if Ip_Data[row]['remediated_previously'] == 1 %}
+                <td><span class="true">Yes</span></td>
+                {% else %}
+                <td><span class="false">No</span></td>
+                {% endif %}
+
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}  

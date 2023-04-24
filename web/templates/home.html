@@ -3,32 +3,35 @@
 
 {% block content %}
 
-    <div class="container col-xxl-8 px-4 py-5">
-        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
-        <div class="col-10 col-sm-8 col-lg-6">
-            <img src="/static/assets/Remedicado_logo.png" class="d-block mx-lg-auto img-fluid" alt="remedocado logo" width="700" loading="lazy">
-        </div>
-        <div class="col-lg-6">
-            <h1 class="display-5 fw-bold lh-1 mb-3">Remedicado</h1>
-            <p class="lead" style="font-style: italic;">pronounced [ri-mee-dee-ka-doh]</p>
-            <p class="lead">A remediation tracking software that adapts to the way you work.</p>
-        </div>
+    <div class="container">
+        <div class="hero">
+            <div class="container">
+                <div>
+                    <h1 class="">Remedicado</h1>
+                    <p style="font-style: italic;">pronounced [ri-mee-dee-ka-doh]</p>
+                    <p>A remediation tracking software that adapts to the way you work.</p>
+                </div>
+                <div>
+                    <img src="/static/assets/Remedicado_logo.png" alt="remedocado logo" width="700">
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="px-4 py-5 my-5 text-center bg-dk">
-        <i class="fa-brands fa-github hero-icon highlight"></i>
-        <h1 class="display-5 fw-bold highlight">Help make some 'guac'</h1>
-        <div class="col-lg-6 mx-auto">
-        <p class="lead mb-4">Help contribute to the github project. Be it big or small, code, documentation or just feedback every little helps.</p>
-        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <button type="button" class="btn btn-primary btn-lg px-4 gap-3 comp-btn">View the project</button>
-        </div>
+    <div class="container">
+        <div class="cta">
+            <div class="container">
+                <div class="stack">
+                    <i class="fa-brands fa-github hero-icon"></i>
+                    <h1>Help make some 'guac'</h1>
+                    <p>Help contribute to the github project. Be it big or small, code, documentation or just feedback; every contribution helps.</p>
+                    <div>
+                        <button type="button" class="btn">View the project</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="b-example-divider"></div>
-    <div>
-        <p>SOMETHING ELSE</p>
-    </div>
+
 
 {% endblock %}  

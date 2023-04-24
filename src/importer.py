@@ -204,6 +204,8 @@ class Importer:
                 ## If not in db already, add to db
                 print(f"{SELF.UPLOAD_DICT[source]['name']} hasn't been reported before")
 
+                print(SELF.UPLOAD_DICT[source])
+
                 try:
                     mycursor.execute(f'''
                         INSERT INTO remedicado.remediation (
@@ -229,6 +231,7 @@ class Importer:
 
                 except Exception as error: 
                     print(error)
+                    continue
                 
                 #locate
                 mycursor.execute(f'''

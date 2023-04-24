@@ -1,0 +1,85 @@
+{% extends "base.html" %}  
+{% block title %}Remediations{% endblock %}  
+{% block headings %} <script src="/static/table_href.js"></script> {% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+    <h1>Remediations</h1>
+    <p>add some kinda graphs here later</p>
+</div>
+<div></div>
+
+<div class="container">
+    <div class="hero">
+        <div class="full-width">
+            <h1>Remediations list</h1>
+            <div class="seperator"></div>
+        </div>
+        <table class="full-width">
+            <tr>
+                {% for header in headings %}
+                <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in data %}
+            <tr data-href="{{ url_for('Remediation_Details', ID=row[0])}}">
+                <td class="header-column" id="{{row[0]}}">
+                    <p class="bold">{{ row[1] }}</p>
+                </td>
+                
+                {% if row[2] >= 9 %}
+                <!-- Critical severity (9+)-->
+
+                <td class="severity">
+                    <span class="critical">{{ row[2] }}</span>
+                    <img src="/static/assets/icons/panicacado.svg" alt="critical severity">
+                </td>
+
+                {% elif row[2] >= 7 %}
+                <!-- High severity (7+)-->
+
+                <td class="severity">
+                    <span class="high">{{ row[2] }}</span>
+                    <img src="/static/assets/icons/ripeacado.svg" alt="high severity">
+                </td>
+
+                {% elif row[2] >= 4 %}
+                <!-- medium severity (4+)-->
+
+                <td class="severity">
+                    <span class="medium">{{ row[2] }}</span>
+                    <img src="/static/assets/icons/baseacado.svg" alt="medium severity">
+                </td>
+
+                {% else %}
+                <!-- low / info severity (>4)-->
+
+                <td class="severity">
+                    <span class="low">{{ row[2] }}</span>
+                    <img src="/static/assets/icons/infoacado.svg" alt="low severity">
+                </td>
+                
+                
+                {% endif %}
+
+                <td>{{ row[3] }}</td>
+                <td>
+                    <div class="progress_border" style="width: 80%;">
+                        <div class="progress_bar" style="width:{{ row[5] }}%;">{{ row[4] }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="progress_border" style="width: 80%;">
+                        <div class="progress_bar" style="width:{{ row[5] }}%;">{{ row[4] }}</div>
+                    </div>
+                </td>
+                
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+{% endblock %}  
