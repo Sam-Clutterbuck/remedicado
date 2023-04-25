@@ -1,4 +1,7 @@
 import mysql.connector
+import yaml
+from os.path import isfile
+from datetime import datetime, timedelta, date
 
 import test_data.SECRETS as SECRETS
 from src.sql_helpers import Helpers
@@ -69,7 +72,7 @@ class Data_Parser:
             if (all_ips[ip]['remediated'] == 0):
                 unremediated_ips.append(ip)
         
-        return unremediated_ips
+        return unremediated_ips, all_ips
     
     @Remediation_Id_Clense
     def Get_Remediated_Ips(Remediation_Id):
@@ -111,3 +114,52 @@ class Data_Parser:
         remediation_details = Helpers.Sql_To_Dict(mycursor.description, mycursor.fetchone())
 
         return remediation_details
+    
+    @Remediation_Id_Clense
+    def Policy_Status_Check(Remediation_Id):
+        ip_list = Data_Parser.Get_Affected_Ips(Remediation_Id)
+        remediation_details = Data_Parser.Get_Remediation_Details(Remediation_Id)
+
+        sum = 0
+        count = 0
+        for ip in ip_list:
+            if (ip_list[ip]['remediated'] == 0):
+                
+                if ( date.today() >= ip_list[ip]['last_seen'] ):
+                    diff = date.today() - ip_list[ip]['date_reported']
+                else:
+                    diff = ip_list[ip]['last_seen'] - ip_list[ip]['date_reported']
+                
+                sum += (diff / timedelta(days=1))
+                count += 1
+
+        average = sum / count
+        if (average <= 0):
+            return 0
+
+        if (isfile('data/remediation_rules.yaml') == False):
+            print("File couldn't be found")
+            return None
+
+        with open('data/remediation_rules.yaml') as file:
+            try:
+                policy_rules = yaml.safe_load(file)
+            except yaml.YAMLError as error:
+                return None
+        
+
+        ## Find the remediation timeframe for severity policy
+        previous_severity = 0
+        timeframe = 0
+        for policy in policy_rules['remediation policies']:
+
+            if (remediation_details['remediation_sev'] >= policy_rules['remediation policies'][policy]['severity'] ):
+                if (policy_rules['remediation policies'][policy]['severity'] >= previous_severity):
+                    previous_severity = policy_rules['remediation policies'][policy]['severity']
+                    timeframe = policy_rules['remediation policies'][policy]['timeframe']
+
+        policy_percent = average / timeframe * 100
+        if (policy_percent >= 100):
+            policy_percent = 100
+
+        return policy_percent, average

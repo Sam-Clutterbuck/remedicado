@@ -171,16 +171,17 @@ body::-webkit-scrollbar {
     font-size: 4rem;
   }
 
-
-  @media only screen and (max-width: 1000px) {
+  
+  @media only screen and (max-width: 1200px) {
     .side-by-side{
       max-width: 100%;
     }
   }
-  @media only screen and (min-width: 1000px) {
+  @media only screen and (min-width: 1200px) {
     .side-by-side{
-      max-width: 48%;
+      max-width: 40%;
       align-self:flex-start;
+      padding: 4rem !important; 
     }
   }
 
@@ -195,6 +196,7 @@ body::-webkit-scrollbar {
 
   .btn {
     padding: 1rem;
+    text-decoration: none;
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--base-100);
@@ -203,7 +205,7 @@ body::-webkit-scrollbar {
     border: .2rem solid var(--base-100);
     border-radius: 0rem 2rem 2rem 2rem;
     box-shadow: .5rem .5rem 0 .1rem var(--base-100);
-    margin: 1rem;
+    
 
     &:hover{
         cursor: pointer;
@@ -213,6 +215,13 @@ body::-webkit-scrollbar {
         
     }
 
+   }
+   .btn-div{
+    margin: 2rem;
+
+    &:hover{
+      transform: translate(.6rem,.6rem);
+    }
    }
 
    .full-width{
@@ -264,10 +273,7 @@ body::-webkit-scrollbar {
   .severity{
     font-weight: 700;
   }
-  .severity img{
-    width: 3rem;
-  }
-
+ 
   .severity span{
     padding: 0 3rem;
     border: solid 1px var(--off-black);
@@ -278,7 +284,11 @@ body::-webkit-scrollbar {
 
   .severity > * {
     vertical-align : middle;
-}
+  }
+
+  .rating img{
+    width: 6rem;
+  }
 
   .critical{
     color: var(--off-white);

@@ -34,7 +34,6 @@
 
                 <td class="severity">
                     <span class="critical">{{ row[2] }}</span>
-                    <img src="/static/assets/icons/panicacado.svg" alt="critical severity">
                 </td>
 
                 {% elif row[2] >= 7 %}
@@ -42,7 +41,6 @@
 
                 <td class="severity">
                     <span class="high">{{ row[2] }}</span>
-                    <img src="/static/assets/icons/ripeacado.svg" alt="high severity">
                 </td>
 
                 {% elif row[2] >= 4 %}
@@ -50,7 +48,6 @@
 
                 <td class="severity">
                     <span class="medium">{{ row[2] }}</span>
-                    <img src="/static/assets/icons/baseacado.svg" alt="medium severity">
                 </td>
 
                 {% else %}
@@ -58,7 +55,6 @@
 
                 <td class="severity">
                     <span class="low">{{ row[2] }}</span>
-                    <img src="/static/assets/icons/infoacado.svg" alt="low severity">
                 </td>
                 
                 
@@ -72,8 +68,17 @@
                 </td>
                 <td>
                     <div class="progress_border" style="width: 80%;">
-                        <div class="progress_bar" style="width:{{ row[5] }}%;">{{ row[4] }}</div>
+                        {% if row[6] >= 80 %}
+                        <div class="progress_bar" style="width:{{row[6]}}%;  background-color: var(--critical)">{{row[7]}}</div>
+                        {% elif row[6] >= 40 %}
+                        <div class="progress_bar" style="width:{{row[6]}}%;  background-color: var(--high)">{{row[7]}}</div>
+                        {% else %}
+                        <div class="progress_bar" style="width:{{row[6]}}%;  background-color: var(--med)">{{row[7]}}</div>
+                        {% endif %}
                     </div>
+                </td>
+                <td class="rating">
+                    <img src="/static/assets/icons/ratings/{{row[8]}}" alt="Rating Icon">
                 </td>
                 
             </tr>
