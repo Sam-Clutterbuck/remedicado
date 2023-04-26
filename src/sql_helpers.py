@@ -49,10 +49,19 @@ class Helpers:
                 return ip_id[0]
 
 
+    def Multi_Sql_To_Dict(Header_list, Sql_Data):
+        
+        sql_dict = {}
+        counter = 0
+        for row in Sql_Data:
+            sql_item = Helpers.Sql_To_Dict(Header_list, row)
+            sql_dict.update({counter:sql_item})
+            counter +=1
+        
+        return sql_dict
+
+
     def Sql_To_Dict(Header_list, Sql_Data):
-         
-        # header_list = cursor.description
-        # sql_data = cursor.fetchone
 
         if Header_list is None or Sql_Data is None:
                 return

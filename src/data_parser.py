@@ -1,5 +1,7 @@
 import mysql.connector
 import yaml
+import csv
+import hashlib
 from os.path import isfile
 from datetime import datetime, timedelta, date
 
@@ -38,13 +40,28 @@ class Data_Parser:
         return Int_Check
 
 
+    def File_Exists(File):
+         
+        if (isfile(File) == False):
+            print("File couldn't be found")
+            return False
+        
+        return True
+    
+    def Hash_File(Content):
+        hash = hashlib.sha256()
+        hash.update(Content)
+        sha_hash = hash.hexdigest()
+        
+        return sha_hash
+
     #######################################################################
 
     @Remediation_Id_Clense
     def Get_Affected_Ips(Remediation_Id):
 
         mycursor.execute(f'''
-                SELECT ip_list.ip_list_address, ips.date_reported, ips.remediated, ips.last_seen, ips.remediated_previously
+                SELECT ip_list.ip_list_id, ip_list.ip_list_address, ips.date_reported, ips.remediated, ips.last_seen, ips.remediated_previously
                 FROM remedicado.remediation rem
                 JOIN remedicado.affected_ips ips
                 ON ips.remediation_id = rem.remediation_id
@@ -53,12 +70,7 @@ class Data_Parser:
                 WHERE rem.remediation_id = {Remediation_Id};
                 ''')
             
-        ip_dict = {}
-        counter = 0
-        for row in mycursor.fetchall():
-            row_dict = Helpers.Sql_To_Dict(mycursor.description, row)
-            ip_dict.update({counter:row_dict})
-            counter +=1
+        ip_dict = Helpers.Multi_Sql_To_Dict(mycursor.description, mycursor.fetchall())
 
         return ip_dict
 
@@ -70,7 +82,7 @@ class Data_Parser:
 
         for ip in all_ips:
             if (all_ips[ip]['remediated'] == 0):
-                unremediated_ips.append(ip)
+                unremediated_ips.append(all_ips[ip]['ip_list_id'])
         
         return unremediated_ips, all_ips
     
@@ -82,7 +94,7 @@ class Data_Parser:
 
         for ip in all_ips:
             if (all_ips[ip]['remediated'] == 1):
-                remediated_ips.append(ip)
+                remediated_ips.append(all_ips[ip]['ip_list_id'])
         
         return remediated_ips, all_ips
 
@@ -93,12 +105,7 @@ class Data_Parser:
                 FROM remedicado.remediation
                 ''')
 
-        remediation_dict = {}
-        counter = 0
-        for row in mycursor.fetchall():
-            remediation_item = Helpers.Sql_To_Dict(mycursor.description, row)
-            remediation_dict.update({counter:remediation_item})
-            counter +=1
+        remediation_dict = Helpers.Multi_Sql_To_Dict(mycursor.description, mycursor.fetchall())
 
             
         return remediation_dict
@@ -137,9 +144,9 @@ class Data_Parser:
         if (average <= 0):
             return 0
 
-        if (isfile('data/remediation_rules.yaml') == False):
-            print("File couldn't be found")
+        if not Data_Parser.File_Exists('data/remediation_rules.yaml'):
             return None
+
 
         with open('data/remediation_rules.yaml') as file:
             try:
@@ -163,3 +170,75 @@ class Data_Parser:
             policy_percent = 100
 
         return policy_percent, average
+
+    def List_Sources():
+        mycursor.execute(f'''
+                    SELECT *
+                    FROM remedicado.sources ''')
+        
+        sources_dict = Helpers.Multi_Sql_To_Dict(mycursor.description, mycursor.fetchall())
+
+        return sources_dict
+    
+    def Get_Source_Breakdown(Source_Id):
+        source_list = Data_Parser.List_Sources()
+
+        valid = False
+        for source in source_list:
+            if (int(Source_Id) == int(source_list[source]['source_id'])):
+                source_name = f"{source_list[source]['source_name']}_Remediations_Breakdown.csv"
+                valid = True
+
+        if (valid == False):
+            return
+        
+        mycursor.execute(f'''
+                    SELECT remediation_id, remediation_source_id, remediation_last_updated
+                FROM remedicado.remediation
+                WHERE remediation_source = {Source_Id};
+                ''')
+        
+
+        remediation_dict = Helpers.Multi_Sql_To_Dict(mycursor.description, mycursor.fetchall())
+
+        for source in remediation_dict:
+            
+            unremediated, total = Data_Parser.Get_Unremediated_Ips(remediation_dict[source]['remediation_id'])
+
+            remediation_dict[source].update({'reported_ips': len(total), 'affected_ips':len(unremediated)})
+
+
+        with open(f'data/{source_name}', 'w', newline='') as csvfile:  
+            csv_writer = csv.DictWriter(csvfile, remediation_dict[0].keys())
+            csv_writer.writeheader()
+            for source in remediation_dict:
+                csv_writer.writerow(remediation_dict[source])
+            
+
+        return source_name, remediation_dict 
+
+
+    @Remediation_Id_Clense
+    def List_Uploaded_Files(Remediation_Id):
+        mycursor.execute(f'''
+                SELECT uploaded_reports_id, uploaded_reports_filename, uploaded_reports_upload_date, uploaded_reports_hash
+                FROM remedicado.uploaded_reports
+                WHERE remediation_id = {Remediation_Id};
+                ''')
+        
+        file_dict = Helpers.Multi_Sql_To_Dict(mycursor.description, mycursor.fetchall())
+        return file_dict
+
+
+    def Convert_Report_Id_To_Name(Report_Id):
+        
+        mycursor.execute(f'''
+                SELECT uploaded_reports_filename, uploaded_reports_hash
+                FROM remedicado.uploaded_reports
+                WHERE uploaded_reports_id = {Report_Id};
+                ''')
+        
+        report_dict = Helpers.Sql_To_Dict(mycursor.description, mycursor.fetchone())
+        return report_dict
+    
+    

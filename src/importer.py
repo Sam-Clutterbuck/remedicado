@@ -264,7 +264,28 @@ class Importer:
                 SELF.Ip_Loop(source)
 
 
+    def Upload_File(Filename, Remediation_Id, Hash):
 
+        if Filename is None or Remediation_Id is None or Hash is None:
+            return False
+
+        mycursor.execute(f'''
+                    INSERT INTO remedicado.uploaded_reports (
+                        remediation_id, 
+                        uploaded_reports_filename, 
+                        uploaded_reports_upload_date,
+                        uploaded_reports_hash
+                        )
+                    VALUES (
+                        \'{Remediation_Id}\',
+                        \'{Filename}\', 
+                        \'{datetime.now().strftime('%Y-%m-%d')}\',
+                        \'{Hash}\'
+                        );
+                    ''')
+        db.commit()
+
+        return True
 
         
 

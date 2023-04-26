@@ -1,11 +1,15 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, send_file, flash
+from werkzeug.utils import secure_filename
 
-from src import Data_Parser
+from src import Data_Parser, Importer
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 #####################
 #Globals
+
+app.config['UPLOAD_FOLDER'] = "data/uploads/"
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 #10MB max limit
 
 app.secret_key = "TEST"
 #####################
@@ -50,6 +54,8 @@ def Remediations_List():
         remediated_ammount = f"{len(remediated_ips)}/{len(total_ips)}"
         remediated_percent = len(remediated_ips) / len(total_ips) * 100
 
+        source_list = Data_Parser.List_Sources()
+
 
         icon = Icon_Selector(remediation_list[remediation]['remediation_sev'],remediated_percent,policy_percentage)
 
@@ -64,7 +70,7 @@ def Remediations_List():
                      icon))    
     
 
-    return render_template("./remediations.html", headings=headers, data=data)
+    return render_template("./remediations.html", Header_Length=len(headers), Headings=headers, data=data, Sources=source_list)
 
 @app.route("/remediations/Details/<ID>")
 def Remediation_Details(ID):
@@ -75,11 +81,14 @@ def Remediation_Details(ID):
 
     policy_percentage, policy_days = Data_Parser.Policy_Status_Check(ID)
 
+    uploaded_files = Data_Parser.List_Uploaded_Files(ID)
+
     remediated_ammount = f"{len(remediated_ips)}/{len(total_ips)}"
     remediated_percent = len(remediated_ips) / len(total_ips) * 100
 
     ip_dict = Data_Parser.Get_Affected_Ips(ID)
     ip_headers = ['Ip Address','Date Reported','Remediated','Last Seen','Remediated Previously']
+    
 
     icon = Icon_Selector(remediation_details['remediation_sev'],remediated_percent,policy_percentage)
     
@@ -98,7 +107,9 @@ def Remediation_Details(ID):
                            Policy_Percent=policy_percentage,
                            Policy_Days= f"{int(policy_days)}days",
                            Ip_Data=ip_dict,
-                           Ip_Headers=ip_headers)
+                           Ip_Header_Length=len(ip_headers),
+                           Ip_Headers=ip_headers,
+                           Uploaded_Files = uploaded_files)
 
 
 def Icon_Selector(Severity, Remediated_Percent, Policy_Percent):
@@ -124,9 +135,80 @@ def Icon_Selector(Severity, Remediated_Percent, Policy_Percent):
 
     if (int(Policy_Percent) >= int(100)):
         icon_name += '2.svg'
-    elif (int(Policy_Percent) >= int(50)):
+    elif (int(Policy_Percent) >= int(75)):
         icon_name += '1.svg'
     else:
         icon_name += '0.svg'
 
     return icon_name
+
+@app.route("/remediations/Source_Breakdown", methods=['POST'])
+def Source_Breakdown():
+    source_id=request.form['source_id']
+
+    if source_id is None:
+        return redirect(url_for('Remediations_List'))
+    
+    if (type(source_id) != int):
+        try:
+            source_id = int(source_id)
+        except ValueError:
+            return redirect(url_for('Remediations_List'))
+    
+
+    file_name, remediation_dict = Data_Parser.Get_Source_Breakdown(source_id)
+    return send_file(f"../data/{file_name}", as_attachment=True) 
+        
+
+
+@app.route("/remediations/Details/<ID>/upload_report", methods=['POST'])
+def Upload_Report(ID):
+
+    allowed_extensions = ['jpg', 'png', 'pdf']
+
+    if (request.method == 'POST'):
+        file = request.files['vuln_report']
+
+        if file is None:
+            flash(f"No file provided")
+            return redirect(f"{url_for('Remediation_Details', ID=ID)}#vuln_reports")
+
+        if secure_filename(file.filename).split('.')[-1] not in allowed_extensions:
+            flash(f"This file extension is not allowed")
+            return redirect(f"{url_for('Remediation_Details', ID=ID)}#vuln_reports")
+        
+
+        ## TAKE A HASH OF FILE CONTENT AND IF MATCHES EXISTING THEN DON'T UPDATE
+
+        content = file.stream.read()
+        sha_hash = Data_Parser.Hash_File(content)
+        filename = secure_filename(file.filename)
+
+
+        uploaded_files = Data_Parser.List_Uploaded_Files(ID)
+        for file in uploaded_files:
+            if (str(sha_hash).lower() == str(uploaded_files[file]['uploaded_reports_hash']).lower()):
+                flash(f"This file already exists ({uploaded_files[file]['uploaded_reports_filename']})")
+                return redirect(f"{url_for('Remediation_Details', ID=ID)}#vuln_reports")
+
+
+        with open(app.config['UPLOAD_FOLDER']+filename, 'wb') as file:
+            file.write(content)
+        
+        Importer.Upload_File(filename, ID, sha_hash)
+
+        return redirect(f"{url_for('Remediation_Details', ID=ID)}#vuln_reports")
+
+    print()
+
+@app.route("/remediations/Details/<ID>/Download_Report/<Report_Id>")
+def Report_Download(ID, Report_Id):
+
+    file_info = Data_Parser.Convert_Report_Id_To_Name(Report_Id)
+
+    if not Data_Parser.File_Exists(f"data/uploads/{file_info['uploaded_reports_filename']}"):
+        flash(f"File isn't avaliable to be downloaded")
+        return redirect(f"{url_for('Remediation_Details', ID=ID)}#vuln_reports")
+    
+
+    return send_file(f"../data/uploads/{file_info['uploaded_reports_filename']}", as_attachment=True) 
