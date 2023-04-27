@@ -34,19 +34,25 @@ class Data_Parser:
     @Helpers.Int_Id_Clense
     def Get_Affected_Ips(Remediation_Id):
 
-        Helpers.sql_cursor.execute(f'''
-                SELECT ip_list.ip_list_id, ip_list.ip_list_address, ips.date_reported, ips.remediated, ips.last_seen, ips.remediated_previously
-                FROM remedicado.remediation rem
-                JOIN remedicado.affected_ips ips
-                ON ips.remediation_id = rem.remediation_id
-                JOIN remedicado.ip_list ip_list
-                ON ip_list.ip_list_id = ips.ip_list_id
-                WHERE rem.remediation_id = {Remediation_Id};
-                ''')
-            
-        ip_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
+        try:
 
-        return ip_dict
+            Helpers.sql_cursor.execute(f'''
+                    SELECT ip_list.ip_list_id, ip_list.ip_list_address, ips.date_reported, ips.remediated, ips.last_seen, ips.remediated_previously
+                    FROM remediation rem
+                    JOIN affected_ips ips
+                    ON ips.remediation_id = rem.remediation_id
+                    JOIN ip_list ip_list
+                    ON ip_list.ip_list_id = ips.ip_list_id
+                    WHERE rem.remediation_id = {Remediation_Id};
+                    ''')
+                
+            ip_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
+
+            return ip_dict
+
+        except Exception as error: 
+            print(error)
+            return None
 
     @Helpers.Int_Id_Clense
     def Get_Unremediated_Ips(Remediation_Id):
@@ -74,28 +80,40 @@ class Data_Parser:
 
 
     def Get_Remediation_List():
-        Helpers.sql_cursor.execute(f'''
-                SELECT *
-                FROM remedicado.remediation
-                ''')
+        
+        try:
+            Helpers.sql_cursor.execute(f'''
+                    SELECT *
+                    FROM remediation
+                    ''')
 
-        remediation_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
+            remediation_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
 
-            
-        return remediation_dict
+                
+            return remediation_dict
+        
+        except Exception as error: 
+            print(error)
+            return None
     
     @Helpers.Int_Id_Clense
     def Get_Remediation_Details(Remediation_Id):
-        Helpers.sql_cursor.execute(f'''
-                SELECT *
-                FROM remedicado.remediation
-                WHERE remediation_id = {Remediation_Id};
-                ''')
         
-        remediation_details = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
+        try:
+            Helpers.sql_cursor.execute(f'''
+                    SELECT *
+                    FROM remediation
+                    WHERE remediation_id = {Remediation_Id};
+                    ''')
+            
+            remediation_details = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
 
-        return remediation_details
-    
+            return remediation_details
+        
+        except Exception as error: 
+            print(error)
+            return None
+        
     @Helpers.Int_Id_Clense
     def Policy_Status_Check(Remediation_Id):
         ip_list = Data_Parser.Get_Affected_Ips(Remediation_Id)
@@ -116,17 +134,17 @@ class Data_Parser:
 
         average = sum / count
         if (average <= 0):
-            return 0
+            return 0, 0
 
         if not Data_Parser.File_Exists('data/remediation_rules.yaml'):
-            return None
+            return None, None
 
 
         with open('data/remediation_rules.yaml') as file:
             try:
                 policy_rules = safe_load(file)
             except YAMLError as error:
-                return None
+                return None, None
         
 
         ## Find the remediation timeframe for severity policy
@@ -152,13 +170,19 @@ class Data_Parser:
             return 100, over_policy
 
     def List_Sources():
-        Helpers.sql_cursor.execute(f'''
-                    SELECT *
-                    FROM remedicado.sources ''')
         
-        sources_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
+        try:
+            Helpers.sql_cursor.execute(f'''
+                        SELECT *
+                        FROM sources ''')
+            
+            sources_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
 
-        return sources_dict
+            return sources_dict
+        
+        except Exception as error: 
+            print(error)
+            return None
     
 
     @Helpers.Int_Id_Clense
@@ -174,11 +198,15 @@ class Data_Parser:
         if (valid == False):
             return
         
-        Helpers.sql_cursor.execute(f'''
-                SELECT remediation_id, remediation_source_id, remediation_last_updated
-                FROM remedicado.remediation
-                WHERE remediation_source = {Source_Id};
-                ''')
+        try:
+            Helpers.sql_cursor.execute(f'''
+                    SELECT remediation_id, remediation_source_id, remediation_last_updated
+                    FROM remediation
+                    WHERE remediation_source = {Source_Id};
+                    ''')
+        except Exception as error: 
+            print(error)
+            return
         
 
         remediation_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
@@ -202,26 +230,48 @@ class Data_Parser:
 
     @Helpers.Int_Id_Clense
     def List_Uploaded_Files(Remediation_Id):
-        Helpers.sql_cursor.execute(f'''
-                SELECT uploaded_reports_id, uploaded_reports_filename, uploaded_reports_upload_date, uploaded_reports_hash
-                FROM remedicado.uploaded_reports
-                WHERE remediation_id = {Remediation_Id};
-                ''')
+        try:
+            Helpers.sql_cursor.execute(f'''
+                    SELECT uploaded_reports_id, uploaded_reports_filename, uploaded_reports_upload_date, uploaded_reports_hash
+                    FROM uploaded_reports
+                    WHERE remediation_id = {Remediation_Id};
+                    ''')
+            
         
-        file_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
-        return file_dict
+            file_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
+            return file_dict
+        
+        except Exception as error: 
+            print(error)
+            return None
     
     def Remediate_Ip(Ip_Id, Remediation_Id):
         
-        Helpers.sql_cursor.execute(f'''
-                UPDATE remedicado.affected_ips 
-                SET remediated=true,
-                    remediated_previously=true
-                WHERE remediation_id=\'{Remediation_Id}\'
-                AND ip_list_id=\'{Ip_Id}\';
-                ''')
-        Helpers.db.commit()
+        try:
+            Helpers.sql_cursor.execute(f'''
+                    UPDATE affected_ips 
+                    SET remediated=true,
+                        remediated_previously=true
+                    WHERE remediation_id=\'{Remediation_Id}\'
+                    AND ip_list_id=\'{Ip_Id}\';
+                    ''')
+            Helpers.db.commit()
 
+        except Exception as error: 
+            print(error)
+            return
+        
+    def Add_Source(Source_Name):
+        try:
+            Helpers.sql_cursor.execute(f'''
+                    INSERT INTO sources (source_name) 
+                    VALUES (\'{Source_Name}\');
+                    ''')
+            Helpers.db.commit()
+
+        except Exception as error: 
+            print(error)
+            return
 
 
     #################################################################################
@@ -232,7 +282,7 @@ class Data_Parser:
 
         try:
             Helpers.sql_cursor.execute(f'''
-            DELETE FROM remedicado.uploaded_reports 
+            DELETE FROM uploaded_reports 
             WHERE uploaded_reports_id = {Report_ID};
             ''')
             Helpers.db.commit()
@@ -246,14 +296,14 @@ class Data_Parser:
         
         try:
             Helpers.sql_cursor.execute(f'''
-            DELETE FROM remedicado.affected_ips 
+            DELETE FROM affected_ips 
             WHERE remediation_id = {Remediation_Id};
             ''')
             Helpers.db.commit()
 
 
             Helpers.sql_cursor.execute(f'''
-            DELETE FROM remedicado.remediation 
+            DELETE FROM remediation 
             WHERE remediation_id = {Remediation_Id};
             ''')
             Helpers.db.commit()
@@ -263,5 +313,15 @@ class Data_Parser:
             return
 
 
+    @Helpers.Int_Id_Clense
+    def Delete_Source(Source_Id):
+        try:
+            Helpers.sql_cursor.execute(f'''
+            DELETE FROM sources 
+            WHERE source_id = {Source_Id};
+            ''')
+            Helpers.db.commit()
 
-    
+        except Exception as error: 
+            print(error)
+            return

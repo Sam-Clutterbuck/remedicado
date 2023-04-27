@@ -39,7 +39,7 @@ class Helpers:
         try:
             Helpers.sql_cursor.execute(f'''
                 SELECT ip_list_id
-                FROM remedicado.ip_list
+                FROM ip_list
                 WHERE ip_list_address=\'{Ip_Address}\';
                 ''')
             
@@ -52,46 +52,62 @@ class Helpers:
             print(error)
 
         if not exists:
-            Helpers.sql_cursor.execute(f'''
-                INSERT INTO remedicado.ip_list (ip_list_address)
-                VALUES (\'{Ip_Address}\');
-                ''')
-            Helpers.db.commit()
-            
-            Helpers.sql_cursor.execute(f'''
-                SELECT ip_list_id
-                FROM remedicado.ip_list
-                WHERE ip_list_address=\'{Ip_Address}\';
-                ''')
-            
-            for ip_id in Helpers.sql_cursor:
-                #print(f"Added '{Ip_Address}' to ip list with id {ip_id[0]}")
-                return ip_id[0]
+
+            try:
+                Helpers.sql_cursor.execute(f'''
+                    INSERT INTO ip_list (ip_list_address)
+                    VALUES (\'{Ip_Address}\');
+                    ''')
+                Helpers.db.commit()
+                
+                Helpers.sql_cursor.execute(f'''
+                    SELECT ip_list_id
+                    FROM ip_list
+                    WHERE ip_list_address=\'{Ip_Address}\';
+                    ''')
+                
+                for ip_id in Helpers.sql_cursor:
+                    #print(f"Added '{Ip_Address}' to ip list with id {ip_id[0]}")
+                    return ip_id[0]
+                
+            except Exception as error: 
+                print(error)
+                return None
 
     @Int_Id_Clense
     def Report_Id_To_Name(Report_Id):
         
-        Helpers.sql_cursor.execute(f'''
-                SELECT uploaded_reports_filename, uploaded_reports_hash
-                FROM remedicado.uploaded_reports
-                WHERE uploaded_reports_id = {Report_Id};
-                ''')
-        
-        report_dict = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
-        return report_dict
+        try:
+            Helpers.sql_cursor.execute(f'''
+                    SELECT uploaded_reports_filename, uploaded_reports_hash
+                    FROM uploaded_reports
+                    WHERE uploaded_reports_id = {Report_Id};
+                    ''')
+            
+            report_dict = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
+            return report_dict
+
+        except Exception as error: 
+            print(error)
+            return None
     
 
     @Int_Id_Clense
     def Remediation_Id_To_Name(Remediation_Id):
         
-        Helpers.sql_cursor.execute(f'''
-                SELECT remediation_name
-                FROM remedicado.remediation
-                WHERE remediation_id = {Remediation_Id};
-                ''')
+        try:
+            Helpers.sql_cursor.execute(f'''
+                    SELECT remediation_name
+                    FROM remediation
+                    WHERE remediation_id = {Remediation_Id};
+                    ''')
+            
+            remediation_dict = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
+            return remediation_dict
         
-        remediation_dict = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
-        return remediation_dict
+        except Exception as error: 
+            print(error)
+            return None
 
     def Multi_Sql_To_Dict(Header_list, Sql_Data):
         

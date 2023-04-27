@@ -35,7 +35,13 @@ delete report:
   alt: ['dr']
 
 delete remediation:
-  alt: ['d']
+  alt: ['xr']
 
 remediate ip:
   alt: ['ri']
+
+add source:
+  alt: ['as']
+
+delete source:
+  alt: [xs]

@@ -273,6 +273,8 @@ created by: @Sam-Clutterbuck
         print(f"Listing Remediations: \n")
         
         remediations = Data_Parser.Get_Remediation_List()
+        if remediations is None or (remediations == {}):
+            return
         print(Cli.Format_Table(remediations[0].keys(), remediations))
         return
     
@@ -280,6 +282,8 @@ created by: @Sam-Clutterbuck
         print(f"Listing Sources: \n")
 
         sources = Data_Parser.List_Sources()
+        if sources is None or (sources == {}):
+            return
         print(Cli.Format_Table(sources[0].keys(), sources))
         return
     
@@ -293,6 +297,9 @@ created by: @Sam-Clutterbuck
 
         file_name, remediation_dict = Data_Parser.Get_Source_Breakdown(source_id)
         
+        if file_name is None or remediation_dict is None or (file_name == {}) or (remediation_dict == {}):
+            return
+
         if (Cli.Yes_No_Option("Would you like to view in console?")):
             print(Cli.Format_Table(remediation_dict[0].keys(), remediation_dict))
 
@@ -308,9 +315,15 @@ created by: @Sam-Clutterbuck
 
         remediation_id = Cli.Get_Int_Input("Select a remediation ID to view:")
         remediation_details = Data_Parser.Get_Remediation_Details(remediation_id)
+        if remediation_details is None or (remediation_details == {}):
+            return
         remediated_ips, total_ips = Data_Parser.Get_Remediated_Ips(remediation_id)
+        if remediated_ips is None or (remediated_ips == {}) or total_ips is None or (total_ips == {}):
+            return
 
         policy_percentage, policy_days = Data_Parser.Policy_Status_Check(remediation_id)
+        if policy_percentage is None or (policy_percentage == {}) or policy_days is None or (policy_days == {}):
+            return
         if (policy_percentage >= 100): 
             policy_status = "Out of Policy"
         else:
@@ -409,6 +422,8 @@ Description:
 
 
         uploaded_files = Data_Parser.List_Uploaded_Files(remediation_id)
+        if uploaded_files is None or (uploaded_files == {}):
+            return
         for file in uploaded_files:
             if (str(sha_hash).lower() == str(uploaded_files[file]['uploaded_reports_hash']).lower()):
                 print(f"This file already exists ({uploaded_files[file]['uploaded_reports_filename']})")
@@ -492,6 +507,33 @@ Description:
         Data_Parser.Remediate_Ip(ip_id, remediation_id)
         return
 
+    def Add_Source():
+
+        if (Cli.Yes_No_Option("Would you like to view existing sources?")):
+            Cli.List_Sources()
+
+
+        selection = input(f"What source would you like to add:\n")
+
+        if (selection.lower() == "q") or (selection.lower() == "quit"):
+            print(f"quiting...")
+            return
+        
+        Data_Parser.Add_Source(selection)
+
+        return
+    
+    def Delete_Source():
+
+        if (Cli.Yes_No_Option("Would you like to view possible sources?")):
+            Cli.List_Sources()
+
+        source_id = Cli.Get_Int_Input("Select a source ID to delete:")
+
+        Data_Parser.Delete_Source(source_id)
+
+        return
+
 
     COMMANDS['login'].update({'func':Sign_In})
     COMMANDS['quit'].update({'func':quit})
@@ -507,3 +549,8 @@ Description:
     COMMANDS['delete remediation'].update({'func':Delete_Remediation})
     COMMANDS['remediate ip'].update({'func':Remediate_Ip})
     COMMANDS['plugin options'].update({'func':Plugin_Options})
+    COMMANDS['add source'].update({'func':Add_Source})
+    COMMANDS['delete source'].update({'func':Delete_Source})
+
+
+    

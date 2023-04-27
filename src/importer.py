@@ -61,7 +61,7 @@ class Importer:
         try:
             Helpers.sql_cursor.execute(f'''
                 SELECT ip_list_id
-                FROM remedicado.affected_ips
+                FROM affected_ips
                 WHERE remediation_id=\'{SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID']}\';
                 ''')
             
@@ -69,6 +69,7 @@ class Importer:
 
         except Exception as error: 
             print(error)
+            return
 
 
         ## Cycle through all ips for source and check if they are in the database
@@ -85,35 +86,43 @@ class Importer:
                     already_listed = True
 
             if already_listed:
-                Helpers.sql_cursor.execute(f'''
-                    UPDATE remedicado.affected_ips 
-                    SET remediated=false,
-                        last_seen=\'{datetime.now().strftime('%Y-%m-%d')}\'
-                    WHERE remediation_id=\'{SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID']}\'
-                    AND ip_list_id=\'{ip_id}\';
-                    ''')
-                Helpers.db.commit()
+                try:
+                    Helpers.sql_cursor.execute(f'''
+                        UPDATE affected_ips 
+                        SET remediated=false,
+                            last_seen=\'{datetime.now().strftime('%Y-%m-%d')}\'
+                        WHERE remediation_id=\'{SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID']}\'
+                        AND ip_list_id=\'{ip_id}\';
+                        ''')
+                    Helpers.db.commit()
+                except Exception as error: 
+                    print(error)
+                    return
             else:
                 print(f"INSERTING {ip}")
-                Helpers.sql_cursor.execute(f'''
-                    INSERT INTO remedicado.affected_ips (
-                        remediation_id, 
-                        ip_list_id, 
-                        date_reported,
-                        remediated,
-                        last_seen,
-                        remediated_previously
-                        )
-                    VALUES (
-                        \'{SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID']}\',
-                        \'{ip_id}\', 
-                        \'{datetime.now().strftime('%Y-%m-%d')}\', 
-                        false,
-                        \'{datetime.now().strftime('%Y-%m-%d')}\', 
-                        false
-                        );
-                    ''')
-                Helpers.db.commit()
+                try:
+                    Helpers.sql_cursor.execute(f'''
+                        INSERT INTO affected_ips (
+                            remediation_id, 
+                            ip_list_id, 
+                            date_reported,
+                            remediated,
+                            last_seen,
+                            remediated_previously
+                            )
+                        VALUES (
+                            \'{SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID']}\',
+                            \'{ip_id}\', 
+                            \'{datetime.now().strftime('%Y-%m-%d')}\', 
+                            false,
+                            \'{datetime.now().strftime('%Y-%m-%d')}\', 
+                            false
+                            );
+                        ''')
+                    Helpers.db.commit()
+                except Exception as error: 
+                    print(error)
+                    return
             
         ## Check if any ips have been remediated
         for recorded_ip in ip_list:
@@ -128,14 +137,18 @@ class Importer:
 
             if not in_array:
                 ## if its in the affected ips but not the array it means its been remediated
-                Helpers.sql_cursor.execute(f'''
-                    UPDATE remedicado.affected_ips 
-                    SET remediated=true,
-                        remediated_previously=true
-                    WHERE remediation_id=\'{SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID']}\'
-                    AND ip_list_id=\'{recorded_ip[0]}\';
-                    ''')
-                Helpers.db.commit()
+                try:
+                    Helpers.sql_cursor.execute(f'''
+                        UPDATE affected_ips 
+                        SET remediated=true,
+                            remediated_previously=true
+                        WHERE remediation_id=\'{SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID']}\'
+                        AND ip_list_id=\'{recorded_ip[0]}\';
+                        ''')
+                    Helpers.db.commit()
+                except Exception as error: 
+                    print(error)
+                    break
 
 
     @Import_Validation
@@ -153,7 +166,7 @@ class Importer:
                 ## Check if source exists and its related ID
                 Helpers.sql_cursor.execute(f'''
                     SELECT source_id
-                    FROM remedicado.sources 
+                    FROM sources 
                     WHERE source_name=\'{source_name}\';
                     ''')
                 
@@ -177,7 +190,7 @@ class Importer:
             try:
                 Helpers.sql_cursor.execute(f'''
                     SELECT remediation_id, remediation_name, remediation_source_id 
-                    FROM remedicado.remediation 
+                    FROM remediation 
                     WHERE remediation_source=\'{SELF.UPLOAD_DICT[source]['SQL_SOURCE_ID']}\';
                     ''')
                 
@@ -205,7 +218,7 @@ class Importer:
 
                 try:
                     Helpers.sql_cursor.execute(f'''
-                        INSERT INTO remedicado.remediation (
+                        INSERT INTO remediation (
                             remediation_name, 
                             remediation_desc, 
                             remediation_sev, 
@@ -230,13 +243,18 @@ class Importer:
                     print(error)
                     continue
                 
+                try:
                 #locate
-                Helpers.sql_cursor.execute(f'''
-                    SELECT remediation_id
-                    FROM remedicado.remediation 
-                    WHERE remediation_source=\'{SELF.UPLOAD_DICT[source]['SQL_SOURCE_ID']}\'
-                    AND remediation_source_id=\'{SELF.UPLOAD_DICT[source]['source_id']}\';
-                    ''')
+                    Helpers.sql_cursor.execute(f'''
+                        SELECT remediation_id
+                        FROM remediation 
+                        WHERE remediation_source=\'{SELF.UPLOAD_DICT[source]['SQL_SOURCE_ID']}\'
+                        AND remediation_source_id=\'{SELF.UPLOAD_DICT[source]['source_id']}\';
+                        ''')
+                    
+                except Exception as error: 
+                    print(error)
+                    continue
                 
 
                 remediation_id = Helpers.sql_cursor.fetchone()
@@ -249,13 +267,18 @@ class Importer:
                 SELF.Ip_Loop(source)
             
             else:
-                ## If already in db then add any potential new ips to list
-                Helpers.sql_cursor.execute(f'''
-                        UPDATE remedicado.remediation 
-                        SET remediation_last_updated=\'{datetime.now().strftime('%Y-%m-%d')}\'
-                        WHERE remediation_id=\'{SELF.UPLOAD_DICT[source]["SQL_REPORTED_ID"]}\';
-                        ''')
-                Helpers.db.commit()
+
+                try:
+                    ## If already in db then add any potential new ips to list
+                    Helpers.sql_cursor.execute(f'''
+                            UPDATE remediation 
+                            SET remediation_last_updated=\'{datetime.now().strftime('%Y-%m-%d')}\'
+                            WHERE remediation_id=\'{SELF.UPLOAD_DICT[source]["SQL_REPORTED_ID"]}\';
+                            ''')
+                    Helpers.db.commit()
+                except Exception as error: 
+                    print(error)
+                    continue
 
 
                 SELF.Ip_Loop(source)
@@ -266,21 +289,25 @@ class Importer:
         if Filename is None or Remediation_Id is None or Hash is None:
             return False
 
-        Helpers.sql_cursor.execute(f'''
-                    INSERT INTO remedicado.uploaded_reports (
-                        remediation_id, 
-                        uploaded_reports_filename, 
-                        uploaded_reports_upload_date,
-                        uploaded_reports_hash
-                        )
-                    VALUES (
-                        \'{Remediation_Id}\',
-                        \'{Filename}\', 
-                        \'{datetime.now().strftime('%Y-%m-%d')}\',
-                        \'{Hash}\'
-                        );
-                    ''')
-        Helpers.db.commit()
+        try:
+            Helpers.sql_cursor.execute(f'''
+                        INSERT INTO uploaded_reports (
+                            remediation_id, 
+                            uploaded_reports_filename, 
+                            uploaded_reports_upload_date,
+                            uploaded_reports_hash
+                            )
+                        VALUES (
+                            \'{Remediation_Id}\',
+                            \'{Filename}\', 
+                            \'{datetime.now().strftime('%Y-%m-%d')}\',
+                            \'{Hash}\'
+                            );
+                        ''')
+            Helpers.db.commit()
+        except Exception as error: 
+            print(error)
+            return False
 
         return True
 
