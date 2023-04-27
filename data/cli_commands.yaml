@@ -1,0 +1,41 @@
+login:
+  alt: ['l']
+
+quit:
+  alt: ['q']
+
+help:
+  alt: ['h']
+
+list plugins:
+  alt: ['lp', 'hp']
+
+plugin options:
+  alt: ['po']
+
+remediations list:
+  alt: ['rl', 'lr']
+
+source list:
+  alt: ['sl', 'ls']
+
+download source breakdown:
+  alt: ['dsb', 'ds', 'sb']
+
+remediation details:
+  alt: ['rd', 'vr']
+
+import remediations:
+  alt: ['ir', 'u']
+
+upload report:
+  alt: ['ur']
+
+delete report: 
+  alt: ['dr']
+
+delete remediation:
+  alt: ['d']
+
+remediate ip:
+  alt: ['ri']

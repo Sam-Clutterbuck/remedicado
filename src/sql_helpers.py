@@ -1,15 +1,35 @@
 import mysql.connector
 from datetime import datetime
 
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    passwd="OfAllProblems!",
-    database="remedicado"
-)
-mycursor = db.cursor()
+import test_data.SECRETS as SECRETS
 
 class Helpers:
+
+    db = mysql.connector.connect(
+    host=SECRETS.host,
+    user=SECRETS.user,
+    passwd=SECRETS.passwd,
+    database=SECRETS.database
+    )
+
+    sql_cursor = db.cursor()
+
+    def Int_Id_Clense(Func):
+        def Int_Check(ID):
+            if ID is None:
+                return
+
+            if (type(ID) != int):
+
+                try:
+                    int_id = int(ID)
+                    Func(int_id)
+                except ValueError:
+                    return
+            
+            return Func(ID)
+            
+        return Int_Check
 
     def Ip_To_Id(Ip_Address):
 
@@ -17,13 +37,13 @@ class Helpers:
         ## If not in list add it and get new ID
         exists = False
         try:
-            mycursor.execute(f'''
+            Helpers.sql_cursor.execute(f'''
                 SELECT ip_list_id
                 FROM remedicado.ip_list
                 WHERE ip_list_address=\'{Ip_Address}\';
                 ''')
             
-            for found_ip in mycursor:
+            for found_ip in Helpers.sql_cursor:
                 exists = True
                 #print(f"{Ip_Address} exists with id {found_ip[0]}")
                 return found_ip[0]
@@ -32,22 +52,46 @@ class Helpers:
             print(error)
 
         if not exists:
-            mycursor.execute(f'''
+            Helpers.sql_cursor.execute(f'''
                 INSERT INTO remedicado.ip_list (ip_list_address)
                 VALUES (\'{Ip_Address}\');
                 ''')
-            db.commit()
+            Helpers.db.commit()
             
-            mycursor.execute(f'''
+            Helpers.sql_cursor.execute(f'''
                 SELECT ip_list_id
                 FROM remedicado.ip_list
                 WHERE ip_list_address=\'{Ip_Address}\';
                 ''')
             
-            for ip_id in mycursor:
+            for ip_id in Helpers.sql_cursor:
                 #print(f"Added '{Ip_Address}' to ip list with id {ip_id[0]}")
                 return ip_id[0]
 
+    @Int_Id_Clense
+    def Report_Id_To_Name(Report_Id):
+        
+        Helpers.sql_cursor.execute(f'''
+                SELECT uploaded_reports_filename, uploaded_reports_hash
+                FROM remedicado.uploaded_reports
+                WHERE uploaded_reports_id = {Report_Id};
+                ''')
+        
+        report_dict = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
+        return report_dict
+    
+
+    @Int_Id_Clense
+    def Remediation_Id_To_Name(Remediation_Id):
+        
+        Helpers.sql_cursor.execute(f'''
+                SELECT remediation_name
+                FROM remedicado.remediation
+                WHERE remediation_id = {Remediation_Id};
+                ''')
+        
+        remediation_dict = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
+        return remediation_dict
 
     def Multi_Sql_To_Dict(Header_list, Sql_Data):
         

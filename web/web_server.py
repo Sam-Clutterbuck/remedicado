@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file, flash
 from werkzeug.utils import secure_filename
 
-from src import Data_Parser, Importer
+from src import Data_Parser, Importer, Helpers
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -164,7 +164,7 @@ def Source_Breakdown():
 @app.route("/remediations/Details/<ID>/upload_report", methods=['POST'])
 def Upload_Report(ID):
 
-    allowed_extensions = ['jpg', 'png', 'pdf']
+    allowed_extensions = ['pdf']
 
     if (request.method == 'POST'):
         file = request.files['vuln_report']
@@ -176,9 +176,6 @@ def Upload_Report(ID):
         if secure_filename(file.filename).split('.')[-1] not in allowed_extensions:
             flash(f"This file extension is not allowed")
             return redirect(f"{url_for('Remediation_Details', ID=ID)}#vuln_reports")
-        
-
-        ## TAKE A HASH OF FILE CONTENT AND IF MATCHES EXISTING THEN DON'T UPDATE
 
         content = file.stream.read()
         sha_hash = Data_Parser.Hash_File(content)
@@ -204,7 +201,7 @@ def Upload_Report(ID):
 @app.route("/remediations/Details/<ID>/Download_Report/<Report_Id>")
 def Report_Download(ID, Report_Id):
 
-    file_info = Data_Parser.Convert_Report_Id_To_Name(Report_Id)
+    file_info = Helpers.Report_Id_To_Name(Report_Id)
 
     if not Data_Parser.File_Exists(f"data/uploads/{file_info['uploaded_reports_filename']}"):
         flash(f"File isn't avaliable to be downloaded")
