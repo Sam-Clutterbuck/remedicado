@@ -84,9 +84,9 @@ class CSV_Comparison:
                 SELF.VULN_DICT.update({count : line})
                 count += 1        
 
-        breakdown_headers = ['remediation_name','source_id','severity','affected_ip_count']
+        vuln_headers = ['remediation_name','source_id','severity','affected_ip_count']
         
-        if not SELF.Header_Check(list(SELF.VULN_DICT[0].keys()), breakdown_headers):
+        if not SELF.Header_Check(list(SELF.VULN_DICT[0].keys()), vuln_headers):
             return False
         
         return True
