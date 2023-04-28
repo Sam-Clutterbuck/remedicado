@@ -1,4 +1,4 @@
-import yaml
+from yaml import safe_load, YAMLError
 from prettytable import PrettyTable
 from os.path import isfile
 from werkzeug.utils import secure_filename
@@ -12,15 +12,15 @@ class Cli:
     #########################################################################################
     ## Globals
 
-    if not Data_Parser.File_Exists('data/cli_commands.yaml'):
+    if (isfile('data/cli_commands.yaml') == False):
         print(f"Unable to find commands yaml file (should be found at remedicado/data/cli_commands.yaml )")
         quit()
 
 
     with open('data/cli_commands.yaml') as commands:
         try:
-            COMMANDS = yaml.safe_load(commands)
-        except yaml.YAMLError as error:
+            COMMANDS = safe_load(commands)
+        except YAMLError as error:
             print(f"Unable to find commands : {error}")
             quit()
 
@@ -71,44 +71,6 @@ class Cli:
                 return False
 
             print(f"please select [y]es or [n]o?")
-
-    def Print_Plugin_Options(Options):
-        count = 0
-        for command in Options:
-            print(f"[{count}] | command : {command}\n Arguments: {Options[command]}\n")
-            count += 1
-        return
-    
-
-    def Select_Plugin_Arguments(Options, Selection):
-        
-        entered_args = []
-        count = 0
-        for command in Options:
-            if (count == Selection):
-                if Options[command] is None:
-                    return True, command, None
-
-                for arg in Options[command]:
-                    input_arg = Cli.Get_Type_Input(f"Enter {arg}:", Options[command][arg])
-                    entered_args.append(input_arg)
-                return True, command, entered_args
-
-            count += 1
-        return False, None, None
-    
-    def Get_Type_Input(Prompt, Type):
-        while True:
-            selection = input(f"{Prompt}\n").lower()
-
-            try:
-                converted_selection = Type(selection)
-                return converted_selection
-            except ValueError:
-                if (selection == "q") or (selection == "quit"):
-                    Cli.Enter_Command()
-
-                print(f"Enter a {Type} value")
 
 
     
@@ -215,11 +177,11 @@ created by: @Sam-Clutterbuck
 
         return
     
-    def Plugin_Options():
+    def Run_Plugin():
         if (Cli.Yes_No_Option("Would you like to view installed plugins?")):
             Cli.List_Plugins()
 
-        option = Cli.Get_Int_Input("Select a plugin number to view options:")
+        option = Cli.Get_Int_Input("Select a plugin number to run:")
 
         class_ref = None
         count = 0
@@ -235,34 +197,8 @@ created by: @Sam-Clutterbuck
             print("No plugin found")
             return
         
-        options = class_ref.List_Options()
-        Cli.Print_Plugin_Options(options)
+        class_ref.Call()
 
-        if (Cli.Yes_No_Option("Would you like to run a plugin command?")):
-            selected_option = Cli.Get_Int_Input("Select a plugin command number:")
-
-            success, command, args = Cli.Select_Plugin_Arguments(options,selected_option)
-            if not success:
-                print("Failed to recieve arguments")
-                return
-
-            if (str(command.lower()) == "init"):
-                if args is None:
-                    class_ref()
-                else:
-                    class_ref(*args)
-                    
-                    args.insert
-                return
-
-            if args is None:
-                trigger_function = getattr(class_ref, command)
-                trigger_function()
-            else:
-                trigger_function = getattr(class_ref, command)
-                trigger_function(*args)
-                
-            
         return
 
 
@@ -548,7 +484,7 @@ Description:
     COMMANDS['delete report'].update({'func':Delete_Report})
     COMMANDS['delete remediation'].update({'func':Delete_Remediation})
     COMMANDS['remediate ip'].update({'func':Remediate_Ip})
-    COMMANDS['plugin options'].update({'func':Plugin_Options})
+    COMMANDS['run plugin'].update({'func':Run_Plugin})
     COMMANDS['add source'].update({'func':Add_Source})
     COMMANDS['delete source'].update({'func':Delete_Source})
 

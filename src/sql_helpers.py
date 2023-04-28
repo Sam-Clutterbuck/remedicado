@@ -1,15 +1,30 @@
 import mysql.connector
+from yaml import safe_load, YAMLError
 from datetime import datetime
+from os.path import isfile
+
 
 import test_data.SECRETS as SECRETS
 
 class Helpers:
 
+    if (isfile('data/remedicado_config.yaml') == False):
+        print(f"Unable to find commands yaml file (should be found at remedicado/data/remedicado_config.yaml )")
+        quit()
+
+    with open('data/remedicado_config.yaml') as commands:
+        try:
+            CONFIG = safe_load(commands)
+        except YAMLError as error:
+            print(f"Unable to find config file : {error}")
+            quit()
+
+
     db = mysql.connector.connect(
-    host=SECRETS.host,
+    host=CONFIG['host'],
     user=SECRETS.user,
     passwd=SECRETS.passwd,
-    database=SECRETS.database
+    database=CONFIG['database']
     )
 
     sql_cursor = db.cursor()

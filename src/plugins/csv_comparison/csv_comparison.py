@@ -1,13 +1,3 @@
-#########################################################
-# Plugin : csv_comparison
-# Created by: @Sam-Clutterbuck
-# Version: 0.0.1
-# Last Updated: 27/04/2023
-#
-#
-# Usage:
-# This plugin takes a source breakdown csv and compares it with a top xxxx csv from a source.
-#########################################################
 
 import csv
 
@@ -15,19 +5,8 @@ from os.path import isfile
 from prettytable import PrettyTable
 from datetime import datetime
 
-class_name = "CSV_Comparison"
 
 class CSV_Comparison:
-
-    def List_Options():
-
-        # Option Func Name : arguments
-        options = {'init':
-                   {'breakdown file location' : str,
-                     'Top Vuln file location' : str},
-                    }
-        
-        return options
 
     def __init__(SELF, Source_Breakdown, Top_Vulns):
 

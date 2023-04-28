@@ -1,4 +1,5 @@
 import hashlib
+from os import walk
 from os.path import isdir
 from yaml import safe_load, YAMLError
 
@@ -28,36 +29,111 @@ def iter_namespace(ns_pkg):
     # the name.
     return pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + ".")
 
+def Hash_File_Confirmation(Plugin_Filename, File_Hashes):
+
+    print(Plugin_Filename)
+
+    ## Get list of all files in plugin
+    plugin_files = []
+    for (dirpath, dirnames, filenames) in walk(f'src/plugins/{Plugin_Filename}/'):
+        ## Ignore any __pycache__
+        if (str(dirpath).split('/')[-1] == "__pycache__"):
+            continue
+
+        ## add nested dirs onto the name
+        if (str(dirpath) == f'src/plugins/{Plugin_Filename}/'):
+            plugin_files.extend(filenames)
+        else:
+            temp = []
+            for name in filenames:
+                temp.append(f"{str(dirpath).split('/')[-1]}/{name}")
+            plugin_files.extend(temp)
+
+    ## Check that all files found are referenced in the plugin_hashes.yaml file
+    for found_file in plugin_files:
+        valid = False
+        for file in File_Hashes:
+            if (str(found_file) == 'plugin_hashes.yaml'):
+                valid = True
+            if (str(file) == str(found_file)):
+                valid = True
+        if not valid:
+            return False
+        
+    return True
+
+def Detailed_Hash_Checks(Plugin_Filename):
+
+    ## Get plugin hashes list
+    with open(f'src/plugins/{Plugin_Filename}/plugin_hashes.yaml') as file:
+        try:
+            file_hashes = safe_load(file)
+        except YAMLError as error:
+            quit()
+
+    if file_hashes is None or (file_hashes == {}):
+        return False
+    
+    if not Hash_File_Confirmation(Plugin_Filename, file_hashes):
+        return False
+
+    ## Check the hashes in hash list are correct
+    for file in file_hashes:
+        with open(f'src/plugins/{Plugin_Filename}/{file}', 'rb') as file_to_hash:
+            content = file_to_hash.read()
+
+        hash = hashlib.sha256()
+        hash.update(content)
+        sha_hash = hash.hexdigest()
+        
+        if (sha_hash.lower() != file_hashes[file].lower()):
+            return False
+
+    return True
+
+def Import_Check(Discovered_Plugins):
+    for name in Discovered_Plugins:
+        for plugin in validated_plugins:
+
+            try:
+
+                filename = f"{name.split('.')[-1]}"
+                if (filename == plugin):
+                    ## check the hash of file
+                    with open(f'src/plugins/{filename}/plugin_hashes.yaml', 'rb') as file:
+                        content = file.read()
+
+                    hash = hashlib.sha256()
+                    hash.update(content)
+                    sha_hash = hash.hexdigest()
+
+
+                    if (sha_hash.lower() == validated_plugins[plugin].lower()):
+                    
+                        ## Check hashes
+                        if Detailed_Hash_Checks(filename):
+                            ## LOAD PLUGIN
+                            print(f"Loading Plugin {plugin}")
+
+                            reference = importlib.import_module(name)
+                            plugin_trigger = getattr(reference, 'Trigger')
+                            installed_plugins.update({name: plugin_trigger})
+
+                            
+                        continue
+
+            
+            except:
+                continue
+
+        
+        
+
 discovered_plugins = [
     name
     for finder, name, ispkg
     in iter_namespace(src.plugins)
 ]
 
+Import_Check(discovered_plugins)
 
-for name in discovered_plugins:
-    for plugin in validated_plugins:
-
-        filename = f"{name.split('.')[-1]}.py"
-        if (filename == plugin):
-            ## check the hash of file
-            with open(f'src/plugins/{filename}', 'rb') as file:
-                content = file.read()
-
-            hash = hashlib.sha256()
-            hash.update(content)
-            sha_hash = hash.hexdigest()
-
-            if (sha_hash == validated_plugins[plugin]):
-                ##
-                #LOAD PLUGIN
-                print(f"Loading Plugin {plugin}")
-                reference = importlib.import_module(name)
-                plugin_class = getattr(reference, reference.class_name)
-                installed_plugins.update({name: plugin_class})
-
-                continue
-
-            print(f"Hashes don't match for {file}")
-
-        

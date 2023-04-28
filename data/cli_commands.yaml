@@ -10,8 +10,8 @@ help:
 list plugins:
   alt: ['lp', 'hp']
 
-plugin options:
-  alt: ['po']
+run plugin:
+  alt: ['rp']
 
 remediations list:
   alt: ['rl', 'lr']
