@@ -9,11 +9,12 @@
     <div class="container">
         <div class="title side-by-side">
             <div class="return">
-                <a href="{{ url_for('Remediations_List')}}#{{ID}}"><img src="/static/assets/icons/back.svg" alt="back icon"> <h6>Remediation Details</h6></a>
+                <a href="{{ url_for('Remediations_List')}}#{{ID}}"><img src="/static/assets/icons/back.svg" alt="back icon"> <h6>Remediation List</h6></a>
                 
             </div>
             <h1>{{ Remediation_Name }}</h1>
             <p><span class="bold">Reported: </span>{{Date_Added}} |  <span class="bold">Last updated: </span>{{Last_Updated}}</p>
+            <p><span class="bold">{{Remediation_Source}}:</span> {{Remediation_Source_Id}}</p>
         </div>
 
         {% if Remediation_Sev >= 9 %}
@@ -118,6 +119,15 @@
                         <a href="{{url_for('Report_Download', ID=ID, Report_Id=Uploaded_Files[file]['uploaded_reports_id'])}}">
                             <img src="/static/assets/icons/download.svg" alt="download icon">
                         </a>
+                        <label class="collapse" for="_{{Uploaded_Files[file]['uploaded_reports_id']}}" style="display: inline;"><img src="/static/assets/icons/delete.svg" alt="delete icon"></label>
+                        <input id="_{{Uploaded_Files[file]['uploaded_reports_id']}}" type="checkbox">    
+                        <div class="expander" style="margin-bottom: 3rem;">
+                            <form action="{{url_for('Delete_Report', ID=ID, Report_Id=Uploaded_Files[file]['uploaded_reports_id'])}}" method="POST">
+                                <p>Are you sure you want to delete {{Uploaded_Files[file]['uploaded_reports_filename']}}?</p>
+                                <br>
+                                <input class="btn" type="submit" value="Delete">
+                            </form>
+                        </div>
                     </td>
 
                     {% endfor %}
@@ -140,7 +150,24 @@
     </div>
 
     <div class="hero">
-        <h3 class="close-margin">Ip List</h3>
+        <div class="container">
+            <h3 class="close-margin" Id="ip_list">Ip List</h3>
+        
+            <div>
+                <label class="collapse btn" for="_ips">Remediate ips</label>
+                <input id="_ips" type="checkbox"> 
+                <div class="expander">
+                    <form action="{{url_for('Remediate_Ips', ID=ID)}}" method="POST">
+                        <p><label for="selected_ips">list ips to remediate (seperate by comma):</label></p>
+                        <textarea id="selected_ips" name="selected_ips" rows="4" cols="50" placeholder="xxx.xxx.xxx.xxx (seperate by comma)"></textarea>
+                        <br>
+                        <input class="btn" type="submit" value="Remediate">
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+
         <table style="table-layout: auto;" id="table">
             <tr>
                 {% for count in range(Ip_Header_Length) %}
@@ -169,6 +196,31 @@
             </tr>
             {% endfor %}
         </table>
+    </div>
+
+
+    <div class="full-width">
+        <div class="cta critical">
+            <div class="container">
+
+                <div class="stack">
+                    <div class="btn-div">
+                        <a type="button" class="btn" href="{{ url_for('Edit_Remediation_Details', ID=ID)}}">Edit</a>
+                    </div>
+
+                    <label class="collapse btn" for="_delete" style="display: inline;"><img src="/static/assets/icons/delete.svg" alt="delete icon"> Delete Remediation</label>
+                    <input id="_delete" type="checkbox">    
+                    <div class="expander" style="margin-bottom: 3rem;">
+                        <form action="{{ url_for('Delete_Remediation', ID=ID)}}" method="POST">
+                            <h4>Are you sure you want to delete '{{ Remediation_Name }}'?</h4>
+                            <br>
+                            <input class="btn" type="submit" value="Delete">
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
 </div>

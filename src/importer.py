@@ -78,7 +78,7 @@ class Importer:
         for ip in ip_array:
             
 
-            ip_id = Helpers.Ip_To_Id(ip)
+            ip_id = Helpers.Ip_To_Id_And_Add(ip)
 
             already_listed = False
             for ip in ip_list:
@@ -129,7 +129,7 @@ class Importer:
 
             in_array = False
             for passed_ip in ip_array:
-                ip_id = Helpers.Ip_To_Id(passed_ip)
+                ip_id = Helpers.Ip_To_Id_And_Add(passed_ip)
 
                 if (int(recorded_ip[0]) == int(ip_id)):
                     in_array = True

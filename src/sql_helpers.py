@@ -50,7 +50,6 @@ class Helpers:
 
         ## Check if ip is already in list and return its ID 
         ## If not in list add it and get new ID
-        exists = False
         try:
             Helpers.sql_cursor.execute(f'''
                 SELECT ip_list_id
@@ -59,12 +58,27 @@ class Helpers:
                 ''')
             
             for found_ip in Helpers.sql_cursor:
-                exists = True
                 #print(f"{Ip_Address} exists with id {found_ip[0]}")
                 return found_ip[0]
 
         except Exception as error: 
             print(error)
+            return None
+        
+        return None
+
+
+    def Ip_To_Id_And_Add(Ip_Address):
+
+        ## Check if ip is already in list and return its ID 
+        ## If not in list add it and get new ID
+        exists = False
+
+        returned_id = Ip_To_Id(Ip_Address)
+        if returned_id is not None:
+            return returned_id
+            exists = True
+
 
         if not exists:
 
@@ -123,6 +137,25 @@ class Helpers:
         except Exception as error: 
             print(error)
             return None
+        
+
+    @Int_Id_Clense
+    def Source_Id_To_Name(Source_Id):
+        
+        try:
+            Helpers.sql_cursor.execute(f'''
+                    SELECT source_name
+                    FROM sources
+                    WHERE source_id = {Source_Id};
+                    ''')
+            
+            source_dict = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
+            return source_dict
+
+        except Exception as error: 
+            print(error)
+            return None
+    
 
     def Multi_Sql_To_Dict(Header_list, Sql_Data):
         

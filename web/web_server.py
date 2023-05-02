@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file, flash
 from werkzeug.utils import secure_filename
+from re import search
 
 from src import Data_Parser, Importer, Helpers
 
@@ -72,10 +73,12 @@ def Remediations_List():
 
     return render_template("./remediations.html", Header_Length=len(headers), Headings=headers, data=data, Sources=source_list)
 
-@app.route("/remediations/Details/<ID>")
+@app.route("/remediations/details/<ID>")
 def Remediation_Details(ID):
 
     remediation_details = Data_Parser.Get_Remediation_Details(ID)
+
+    source_name = Helpers.Source_Id_To_Name(remediation_details['remediation_source'])
 
     remediated_ips, total_ips = Data_Parser.Get_Remediated_Ips(ID)
 
@@ -99,6 +102,8 @@ def Remediation_Details(ID):
                            Remediation_Name=remediation_details['remediation_name'], 
                            Remediation_Desc=remediation_details['remediation_desc'].split('\n'),
                            Remediation_Sev=remediation_details['remediation_sev'],
+                           Remediation_Source=source_name['source_name'],
+                           Remediation_Source_Id=remediation_details['remediation_source_id'],
                            Date_Added=remediation_details['remediation_date_reported'],
                            Last_Updated=remediation_details['remediation_last_updated'],
                            Status_Icon=icon,
@@ -126,6 +131,9 @@ def Icon_Selector(Severity, Remediated_Percent, Policy_Percent):
     else :
         icon_name += 'low-'
 
+    if (float(Remediated_Percent) >= float(100)):
+        icon_name = 'safe.svg'
+        return icon_name
     if (float(Remediated_Percent) >= float(75)):
         icon_name += '1-'
     elif (float(Remediated_Percent) >= float(40)):
@@ -142,7 +150,7 @@ def Icon_Selector(Severity, Remediated_Percent, Policy_Percent):
 
     return icon_name
 
-@app.route("/remediations/Source_Breakdown", methods=['POST'])
+@app.route("/remediations/source_breakdown", methods=['POST'])
 def Source_Breakdown():
     source_id=request.form['source_id']
 
@@ -161,7 +169,7 @@ def Source_Breakdown():
         
 
 
-@app.route("/remediations/Details/<ID>/upload_report", methods=['POST'])
+@app.route("/remediations/details/<ID>/upload_report", methods=['POST'])
 def Upload_Report(ID):
 
     allowed_extensions = ['pdf']
@@ -198,7 +206,7 @@ def Upload_Report(ID):
 
     print()
 
-@app.route("/remediations/Details/<ID>/Download_Report/<Report_Id>")
+@app.route("/remediations/details/<ID>/download_report/<Report_Id>")
 def Report_Download(ID, Report_Id):
 
     file_info = Helpers.Report_Id_To_Name(Report_Id)
@@ -209,3 +217,75 @@ def Report_Download(ID, Report_Id):
     
 
     return send_file(f"../data/uploads/{file_info['uploaded_reports_filename']}", as_attachment=True) 
+
+@app.route("/remediations/details/<ID>/remediate_ips", methods=['POST'])
+def Remediate_Ips(ID):
+
+    selected_ips = request.form['selected_ips']
+
+    ip_list = selected_ips.replace(" ", "").split(",")
+
+    clean_list = []
+    for ip in ip_list:
+        clean_ip = search(r".*\d", ip)
+        if clean_ip is not None:
+            clean_list.append(clean_ip.group())
+    
+    secure_ips = []
+    for ip in clean_list:
+        valid = search(r"(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}", ip)
+        if valid is not None:
+            secure_ips.append(ip)
+
+    print(secure_ips)
+
+
+    valid_ip_ids = []
+    for ip in secure_ips:
+        validate = Helpers.Ip_To_Id(ip)
+        if validate is not None:
+            valid_ip_ids.append(validate)
+
+    for ip in valid_ip_ids:
+        Data_Parser.Remediate_Ip(ip, ID)
+
+    
+
+    return redirect(f"{url_for('Remediation_Details', ID=ID)}#ip_list")
+
+
+@app.route("/remediations/details/<ID>/download_report/<Report_Id>", methods=['POST'])
+def Delete_Report(ID, Report_Id):
+
+    Data_Parser.Delete_Report(Report_Id)
+
+    return redirect(f"{url_for('Remediation_Details', ID=ID)}#vuln_reports")
+
+@app.route("/remediations/details/<ID>/download_remediation", methods=['POST'])
+def Delete_Remediation(ID):
+    
+    Data_Parser.Delete_Remediation(ID)
+
+    return redirect(url_for('Remediations_List'))
+
+@app.route("/remediations/details/<ID>/edit")
+def Edit_Remediation_Details(ID):
+
+    remediation_details = Data_Parser.Get_Remediation_Details(ID)
+
+    return render_template("./edit_remediation.html", 
+                           ID=ID,
+                           Remediation_Name=remediation_details['remediation_name'], 
+                           Remediation_Desc=remediation_details['remediation_desc'],
+                           Remediation_Sev=remediation_details['remediation_sev'])
+
+@app.route("/remediations/details/<ID>/edit/commit", methods=['POST'])
+def Commit_Remediation_Edit(ID):
+    
+    remediation_name = request.form['remediation_name']
+    remediation_severity = request.form['remediation_severity']
+    remediation_desc = request.form['remediation_desc']
+
+    Data_Parser.Edit_Remediation(ID,remediation_name,remediation_severity,remediation_desc)
+
+    return redirect(f"{url_for('Remediation_Details', ID=ID)}")

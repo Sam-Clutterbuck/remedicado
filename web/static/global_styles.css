@@ -259,6 +259,11 @@ body::-webkit-scrollbar {
     font-family: 'Space_Mono', monospace;
    }
 
+   textarea{
+    font-family: 'Space_Mono', monospace;
+   }
+
+
    .upload input {
     padding: 1rem;
     font-size: 1rem;
@@ -477,4 +482,21 @@ body::-webkit-scrollbar {
 
   form{
     margin-bottom: 3rem;
+  }
+
+  .collapse{
+    cursor: pointer;
+    display: block;
+    width: 100%;
+  }
+
+  .collapse + input{
+    display: none; /* hide the checkboxes */
+  }
+  .collapse + input + div.expander{
+    display:none;
+  }
+  .collapse + input:checked + div.expander{
+    margin-top: 3rem;
+    display:block;
   }

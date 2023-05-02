@@ -1,6 +1,7 @@
 import csv
 import hashlib
 from os.path import isfile
+from os import remove
 from datetime import datetime, timedelta, date
 from yaml import safe_load, YAMLError
 
@@ -131,6 +132,10 @@ class Data_Parser:
                 
                 sum += (diff / timedelta(days=1))
                 count += 1
+
+        #if none to remediate = 100% comp
+        if (count == 0):
+            return 0, 0
 
         average = sum / count
         if (average <= 0):
@@ -281,15 +286,24 @@ class Data_Parser:
     def Delete_Report(Report_ID):
 
         try:
+
+            report_details = Helpers.Report_Id_To_Name(Report_ID)
+
             Helpers.sql_cursor.execute(f'''
             DELETE FROM uploaded_reports 
             WHERE uploaded_reports_id = {Report_ID};
             ''')
             Helpers.db.commit()
 
+            if Data_Parser.File_Exists(f"data/uploads/{report_details['uploaded_reports_filename']}"):
+                remove(f"data/uploads/{report_details['uploaded_reports_filename']}")
+            
+
         except Exception as error: 
             print(error)
             return
+        
+        return
         
     @Helpers.Int_Id_Clense
     def Delete_Remediation(Remediation_Id):
@@ -320,6 +334,23 @@ class Data_Parser:
             DELETE FROM sources 
             WHERE source_id = {Source_Id};
             ''')
+            Helpers.db.commit()
+
+        except Exception as error: 
+            print(error)
+            return
+        
+
+    def Edit_Remediation(Remediation_Id, Name, Severity, Desc):
+        
+        try:
+            Helpers.sql_cursor.execute(f'''
+                    UPDATE remediation 
+                    SET remediation_name=\'{Name}\',
+                        remediation_sev=\'{Severity}\',
+                        remediation_desc=\'{Desc}\'
+                    WHERE remediation_id=\'{Remediation_Id}\';
+                    ''')
             Helpers.db.commit()
 
         except Exception as error: 

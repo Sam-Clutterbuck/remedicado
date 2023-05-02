@@ -27,7 +27,7 @@ CREATE TABLE `remediation` (
   `remediation_id` int NOT NULL AUTO_INCREMENT,
   `remediation_name` varchar(100) NOT NULL,
   `remediation_desc` longtext NOT NULL,
-  `remediation_sev` int NOT NULL,
+  `remediation_sev` FLOAT NOT NULL,
   `remediation_date_reported` date NOT NULL,
   `remediation_last_updated` date DEFAULT NULL,
   `remediation_source` int NOT NULL,

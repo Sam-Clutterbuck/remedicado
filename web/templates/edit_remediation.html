@@ -1,0 +1,35 @@
+{% extends "base.html" %}  
+{% block title %}{{ Remediation_Name }}{% endblock %}  
+
+{% block content %}
+
+<form action="{{url_for('Commit_Remediation_Edit', ID=ID)}}" method="POST">
+    <div class="container">
+        <div class="side-by-side">
+
+            <div class="return">
+                <a href="{{ url_for('Remediation_Details', ID=ID)}}"><img src="/static/assets/icons/back.svg" alt="back icon"> <h6>Remediation Details</h6></a>
+                
+            </div>
+
+            <h1>Edit remediation</h1>
+            <label for="remediation_name">Remediation Name:</label><br>
+            <input type="text" id="remediation_name" name="remediation_name" maxlength="100" value="{{Remediation_Name}}" style="width: 100%;"><br>
+            <label for="remediation_severity">Severity:</label><br>
+            <input type="number" id="remediation_severity" name="remediation_severity" min="0" max="10" step=".1" value="{{Remediation_Sev}}"><br><br>
+            <div class="container">
+            <input class="btn" type="submit" value="Submit">
+            <input class="btn" type="reset">
+            </div>
+        
+        </div>
+        <div class="side-by-side full-width">
+
+            <label for="remediation_desc">Description:</label><br>
+            <textarea id="remediation_desc" name="remediation_desc" style="width:100%; height:50rem;">{{Remediation_Desc}}</textarea>
+            
+        </div>
+    </div>
+</form>
+
+{% endblock %}  
