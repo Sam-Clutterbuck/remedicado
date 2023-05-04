@@ -31,8 +31,6 @@ def iter_namespace(ns_pkg):
 
 def Hash_File_Confirmation(Plugin_Filename, File_Hashes):
 
-    print(Plugin_Filename)
-
     ## Get list of all files in plugin
     plugin_files = []
     for (dirpath, dirnames, filenames) in walk(f'src/plugins/{Plugin_Filename}/'):
@@ -118,6 +116,7 @@ def Import_Check(Discovered_Plugins):
                             reference = importlib.import_module(name)
                             plugin_trigger = getattr(reference, 'Trigger')
                             installed_plugins.update({name: plugin_trigger})
+
 
                             
                         continue

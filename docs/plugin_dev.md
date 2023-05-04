@@ -34,13 +34,24 @@ class Trigger:
 		# This is the code run on interfacing with user
         print("Move control to this script")
         return
+
+class Web_GUI:
+
+    <plugin name> = Blueprint("<plugin name>", __name__, template_folder='./')
+
+    @plugin.route("/<plugin name>")
+    def <plugin name>_Start():
+
+        return render_template("./template_gui.html")
 	
 ```
-The class **must be named exactly `Trigger`** and **must contain one function named exactly `Call()`**
+The class **must be named exactly `Trigger`** and **must contain one function named exactly `Call()`**, It must also have a second class **named exactly `Web_GUI`** and **must contain one function named `<plugin name>_Start()` with a route to `("/<plugin name>")`**
 
 This allows the Trigger class to be accessed by the user as the user is able to call the `Trigger.Call()` function. As such any code in this function will be run when called. If your plugin only has one task you can trigger it here; Otherwise if it is made up of mutliple inputs or tasks you can create a looping interface simular to the cli file to allow user to control what the plugin does
 
 If required you can also import any of the helper files to this file to allow them to interact.
+
+The Web_GUI class naturally should only be listed if your plugin allows access through web GUI and uses the \<plugin name>_Start function to move control over to the plugin to navigate plugin pages.
 
 ## plugin_hashes.yaml
 The `plugin_hashes.yaml` file is core for confirming the integrity of a plugin.
@@ -49,7 +60,8 @@ This file should contain key : value pairs for every file within the plugin with
 
 ```
 __init__.py : 0E49FDBE7B8EEB4EAD0619A4D2B1EDFA87FFD0850647711F34F5D96C9078F4DB
-trigger.py : EC3A5A0E27DD487E16B616D3FC6093A4BEF0487555ECD80826CFF485FFE2574E
+trigger.py : A7F84A221C823F87D3CA20B3D8F11400D3297EF738B6642674A8621CBF3DB41E
+template_gui.html : 1FC9CC7D7475AD2035EFD29AC6F7F5F0CFFAD2FA9AA386FEDCF687303656A533
 ```
 
 This allows the Remedicado plugin system to parse through all of the listed files and ensure they match the hashes listed in the `plugin_hashes.yaml` file.
@@ -61,5 +73,5 @@ Simularly to the `plugin_hashes.yaml` file within the plugin, Remedicado itself 
 
 A plugin will not be loaded unless it is found in this `valid_plugins.yaml` file so needs to be updated to authenticate the plugin. This is done by adding the name of the plugin (this is the name of the dir that the plugin is housed in) alongside the `sha256 hash` of the plugins `plugin_hashes.yaml` file. This allows the system to confirm the integrity and validity of the `plugin_hashes.yaml` file first before trusting any of the hashes it provides. Again it is important to ensure the file name is exactly correct and that the hash matches otherwise it will not run.
 ```
-template : CE05D91302B74703EF2C1524F6B22FC164E5BE8803A2C3C18854D401156AF666
+template : DC46E93E22F8E0FE3A0826E8E396D89FDA527AE71976D7BCA76866F0819BCF3A
 ```

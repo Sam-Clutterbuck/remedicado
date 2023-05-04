@@ -11,6 +11,7 @@ class CSV_Comparison:
     def __init__(SELF, Source_Breakdown, Top_Vulns):
 
         SELF.IMPORTED = False
+        SELF.RUNNING = True
         SELF.BREAKDOWN = Source_Breakdown
         SELF.VULNS_CSV = Top_Vulns
         SELF.VULN_DICT = {}
@@ -19,6 +20,9 @@ class CSV_Comparison:
             SELF.IMPORTED = True
 
         if SELF.IMPORTED:
+            SELF.COMPARE_FILE = ""
+            SELF.HEADERS = ""
+            SELF.COMPARISON = ""
             SELF.Merge_Comparison()
 
         return
@@ -120,9 +124,24 @@ class CSV_Comparison:
 
 
         headers = comparison.pop(0)
-        formatted_table = PrettyTable(headers)
+        SELF.HEADERS = headers
+        SELF.COMPARISON = comparison
 
-        for row in comparison:
+        with open(f'data/files/Vulnerability_List_{datetime.now().strftime("%Y_%m_%d")}.csv', 'w', newline='') as csvfile:  
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(headers)
+            for row in comparison:
+                csv_writer.writerow(row)
+
+        SELF.RUNNING = False
+        SELF.COMPARE_FILE = f'data/files/Vulnerability_List_{datetime.now().strftime("%Y_%m_%d")}.csv'
+        print(f"Created file : data/files/Vulnerability_List_{datetime.now().strftime('%Y_%m_%d')}.csv")
+    
+    def Print_Table(SELF):
+
+        formatted_table = PrettyTable(SELF.HEADERS)
+
+        for row in SELF.COMPARISON:
             
             cropped = []
             for item in row:
@@ -134,12 +153,3 @@ class CSV_Comparison:
             formatted_table.add_row(cropped)
 
         print(formatted_table)
-
-        with open(f'data/files/Vulnerability_List_{datetime.now().strftime("%Y_%m_%d")}.csv', 'w', newline='') as csvfile:  
-            csv_writer = csv.writer(csvfile)
-            csv_writer.writerow(headers)
-            for row in comparison:
-                csv_writer.writerow(row)
-
-        print(f"Created file : data/files/Vulnerability_List_{datetime.now().strftime('%Y_%m_%d')}.csv")
-    

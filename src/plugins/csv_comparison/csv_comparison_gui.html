@@ -1,0 +1,58 @@
+{% extends "base.html" %}  
+{% block title %}Template Plugin{% endblock %}  
+
+
+{% block content %}
+
+
+<div class=" container">
+    <div class="hero">
+        <h1>Csv comparison</h1>
+        <p>This plugin allows you to take a formatted top xxxx csv report from your source and compare it to your source breakdown to help understand which vulnerabilities to prioritise. </p>
+
+    </div>
+</div>
+
+<div class=" container">
+    <div class="hero full-width">
+        <h1>upload</h1>
+
+        {% for message in get_flashed_messages() %}
+            <div class="alert">
+                {{message}}
+            </div>
+                
+            {% endfor %}
+    
+        <form action="{{url_for('csv_comparison.Csv_Compare')}}" method="POST" enctype="multipart/form-data">
+            <div class="container">
+                <div>
+                    <h5>Select top xxxx vulnerabilities report</h5>
+                    <div class="upload">
+                            <input type="file" id="top_report" name="top_report" accept=".csv">
+                    </div>
+                </div>
+
+                <div>
+                    <h5>Select source breakdown report</h5>
+                    <div class="upload">
+                        <input type="file" id="breakdown_report" name="breakdown_report" accept=".csv">
+                    </div>
+                </div>
+
+                <div class="btn-div">
+                    <div class="btn" style="width: min-content; display: inline;">
+                        <button class="btn-segment">Compare</button>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}  

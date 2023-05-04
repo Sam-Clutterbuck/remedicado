@@ -1,0 +1,26 @@
+{% extends "base.html" %}  
+{% block title %}Plugins{% endblock %}  
+{% block headings %} {% endblock %}
+
+
+{% block content %}
+
+
+
+<div class=" container">
+    
+    {% for plugin in Installed_Plugins %}
+    
+    <div class="plugin stack">
+        <h2 class="plugin_name">{{plugin.split('.')[-1].replace('_',' ')}}</h2>
+
+        <div class="btn-div">
+            <a type="button" class="btn" href="/plugins/{{plugin.split('.')[-1]}}" >Launch plugin</a>
+        </div>
+    </div>
+    
+    {% endfor %}
+
+</div>
+
+{% endblock %}  

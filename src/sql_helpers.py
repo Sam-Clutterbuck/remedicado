@@ -74,7 +74,7 @@ class Helpers:
         ## If not in list add it and get new ID
         exists = False
 
-        returned_id = Ip_To_Id(Ip_Address)
+        returned_id = Helpers.Ip_To_Id(Ip_Address)
         if returned_id is not None:
             return returned_id
             exists = True

@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file, flash
 from werkzeug.utils import secure_filename
 from re import search
+import importlib
 
-from src import Data_Parser, Importer, Helpers
+from src import Data_Parser, Importer, Helpers, Plugins
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
+
 
 #####################
 #Globals
@@ -16,6 +18,7 @@ app.secret_key = "TEST"
 #####################
 
 def Start_Web_App():
+    Plugin_Import()
     app.run(host="0.0.0.0", port=80, debug = True)
 
 ########################################################################
@@ -289,3 +292,78 @@ def Commit_Remediation_Edit(ID):
     Data_Parser.Edit_Remediation(ID,remediation_name,remediation_severity,remediation_desc)
 
     return redirect(f"{url_for('Remediation_Details', ID=ID)}")
+
+
+
+
+########################################################################
+# Import page
+
+@app.route("/import")
+def Import():
+
+    return render_template("./import.html")
+
+@app.route("/import/upload", methods=['POST'])
+def Upload_Import():
+
+    allowed_extensions = ['csv']
+
+    if (request.method == 'POST'):
+        file = request.files['import_report']
+
+        if file is None:
+            flash(f"No file provided")
+            return redirect(url_for('Import'))
+
+        if secure_filename(file.filename).split('.')[-1] not in allowed_extensions:
+            flash(f"This file extension is not allowed")
+            return redirect(url_for('Import'))
+
+        content = file.stream.read()
+        filename = secure_filename(file.filename)
+
+        with open(app.config['UPLOAD_FOLDER']+filename, 'wb') as file:
+            file.write(content)
+        
+        file_import = Importer(app.config['UPLOAD_FOLDER']+filename)
+        file_import.Source_Appender()
+
+        return redirect(url_for('Remediations_List'))
+
+
+    return redirect(url_for('Import'))
+
+
+########################################################################
+# Plugins page
+
+@app.route("/plugins")
+def Plugins_Page():
+
+    return render_template("./plugins.html", Installed_Plugins = web_plugins)
+
+web_plugins = {}
+def Plugin_Import():
+    global web_plugins
+    web_plugins = {}
+
+    for plugin in Plugins.installed_plugins:
+        try:
+
+            reference = importlib.import_module(f"{plugin}.trigger")
+            web_class = getattr(reference, 'Web_GUI')
+
+            web_plugins.update({plugin:web_class})
+
+            from src.plugins.template.trigger import Web_GUI
+
+            plugin_ref = getattr(web_class, plugin.split('.')[-1])
+
+            app.register_blueprint(plugin_ref, url_prefix="/plugins")
+            
+
+        except:
+            continue
+    
+    

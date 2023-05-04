@@ -229,7 +229,7 @@ class Importer:
                             )
                         VALUES (
                             \'{SELF.UPLOAD_DICT[source]["name"]}\',
-                            \'{SELF.UPLOAD_DICT[source]["desc"]}\',
+                            \"{SELF.UPLOAD_DICT[source]["desc"]}\",
                             \'{SELF.UPLOAD_DICT[source]["severity"]}\',
                             \'{datetime.now().strftime('%Y-%m-%d')}\',
                             \'{datetime.now().strftime('%Y-%m-%d')}\',

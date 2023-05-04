@@ -500,3 +500,18 @@ body::-webkit-scrollbar {
     margin-top: 3rem;
     display:block;
   }
+
+  .plugin{
+    width: 25%;
+    padding: 2rem;
+    background-color: var(--base-60);
+    box-shadow: 1rem 1rem 0 .5rem var(--base-100);
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+
+  }
+
+  .plugin_name{
+    width: 100%;
+    padding: 1rem;
+    overflow-wrap: break-word;}

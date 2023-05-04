@@ -348,7 +348,7 @@ class Data_Parser:
                     UPDATE remediation 
                     SET remediation_name=\'{Name}\',
                         remediation_sev=\'{Severity}\',
-                        remediation_desc=\'{Desc}\'
+                        remediation_desc=\"{Desc}\"
                     WHERE remediation_id=\'{Remediation_Id}\';
                     ''')
             Helpers.db.commit()

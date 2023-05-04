@@ -4,20 +4,9 @@
         <title>Remedicado - {% block title %}{% endblock %}</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script src="/static/bootstrap/js/bootstrap.min.js"></script>
         <script src="/static/navbar.js"></script>
-        <link href="/static/fontawesome/css/fontawesome.css" rel="stylesheet">
-        <link href="/static/fontawesome/css/brands.css" rel="stylesheet">
-        <link href="/static/fontawesome/css/solid.css" rel="stylesheet">
         <link rel="stylesheet" href="/static/base.css">
         <link rel="stylesheet" href="/static/global_styles.css">
-
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        
-        <!--
-        <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/static/custom_bootstrap_edit.css">
-        <link rel="stylesheet" href="/static/global_styles.css"> -->
 
         {% block headings %}{% endblock %}
     </head>
@@ -50,6 +39,22 @@
                     <a href="{{url_for('Remediations_List')}}" class="nav-link">
                         <img src="/static/assets/icons/remediations.svg" alt="remediatons icon">
                         <span class="link-text">remediatons</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <div class="seperator"></div>
+                    <a href="{{url_for('Import')}}" class="nav-link">
+                        <img src="/static/assets/icons/upload.svg" alt="import icon">
+                        <span class="link-text">import</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <div class="seperator"></div>
+                    <a href="{{url_for('Plugins_Page')}}" class="nav-link">
+                        <img src="/static/assets/icons/plugin.svg" alt="plugins icon">
+                        <span class="link-text">plugins</span>
                     </a>
                 </li>
                 
