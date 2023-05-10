@@ -21,9 +21,11 @@ class Data_Parser:
         return True
     
     def Hash_File(Content):
-        hash = hashlib.sha256()
-        hash.update(Content)
-        sha_hash = hash.hexdigest()
+        
+        if (type(Content) != bytes):
+            Content = Content.encode()
+        
+        sha_hash = hashlib.sha256(Content).hexdigest()
         
         return sha_hash
 
@@ -37,15 +39,15 @@ class Data_Parser:
 
         try:
 
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                     SELECT ip_list.ip_list_id, ip_list.ip_list_address, ips.date_reported, ips.remediated, ips.last_seen, ips.remediated_previously
                     FROM remediation rem
                     JOIN affected_ips ips
                     ON ips.remediation_id = rem.remediation_id
                     JOIN ip_list ip_list
                     ON ip_list.ip_list_id = ips.ip_list_id
-                    WHERE rem.remediation_id = {Remediation_Id};
-                    ''')
+                    WHERE rem.remediation_id = %(remediation_id)s;
+                    ''', {"remediation_id" : Remediation_Id})
                 
             ip_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
 
@@ -101,11 +103,11 @@ class Data_Parser:
     def Get_Remediation_Details(Remediation_Id):
         
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                     SELECT *
                     FROM remediation
-                    WHERE remediation_id = {Remediation_Id};
-                    ''')
+                    WHERE remediation_id = %(remediation_id)s;
+                    ''', {"remediation_id" : Remediation_Id})
             
             remediation_details = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
 
@@ -204,11 +206,11 @@ class Data_Parser:
             return
         
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                     SELECT remediation_id, remediation_source_id, remediation_last_updated
                     FROM remediation
-                    WHERE remediation_source = {Source_Id};
-                    ''')
+                    WHERE remediation_source = %(remediation_source)s;
+                    ''', {"remediation_source" : Source_Id})
         except Exception as error: 
             print(error)
             return
@@ -236,11 +238,11 @@ class Data_Parser:
     @Helpers.Int_Id_Clense
     def List_Uploaded_Files(Remediation_Id):
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                     SELECT uploaded_reports_id, uploaded_reports_filename, uploaded_reports_upload_date, uploaded_reports_hash
                     FROM uploaded_reports
-                    WHERE remediation_id = {Remediation_Id};
-                    ''')
+                    WHERE remediation_id = %(remediation_id)s;
+                    ''', {"remediation_id" : Remediation_Id})
             
         
             file_dict = Helpers.Multi_Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchall())
@@ -253,13 +255,13 @@ class Data_Parser:
     def Remediate_Ip(Ip_Id, Remediation_Id):
         
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                     UPDATE affected_ips 
                     SET remediated=true,
                         remediated_previously=true
-                    WHERE remediation_id=\'{Remediation_Id}\'
-                    AND ip_list_id=\'{Ip_Id}\';
-                    ''')
+                    WHERE remediation_id=\'%(remediation_id)s\'
+                    AND ip_list_id=\'%(ip_list_id)s\';
+                    ''', {"remediation_id" : Remediation_Id, "ip_list_id": Ip_Id})
             Helpers.db.commit()
 
         except Exception as error: 
@@ -268,10 +270,10 @@ class Data_Parser:
         
     def Add_Source(Source_Name):
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                     INSERT INTO sources (source_name) 
-                    VALUES (\'{Source_Name}\');
-                    ''')
+                    VALUES (\'%(source_name)s\');
+                    ''', {"source_name" : Source_Name})
             Helpers.db.commit()
 
         except Exception as error: 
@@ -289,10 +291,10 @@ class Data_Parser:
 
             report_details = Helpers.Report_Id_To_Name(Report_ID)
 
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
             DELETE FROM uploaded_reports 
-            WHERE uploaded_reports_id = {Report_ID};
-            ''')
+            WHERE uploaded_reports_id = %(uploaded_reports_id)s;
+            ''', {"uploaded_reports_id" : Report_ID})
             Helpers.db.commit()
 
             if Data_Parser.File_Exists(f"data/uploads/{report_details['uploaded_reports_filename']}"):
@@ -309,17 +311,17 @@ class Data_Parser:
     def Delete_Remediation(Remediation_Id):
         
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
             DELETE FROM affected_ips 
-            WHERE remediation_id = {Remediation_Id};
-            ''')
+            WHERE remediation_id = %(remediation_id)s;
+            ''', {"remediation_id" : Remediation_Id})
             Helpers.db.commit()
 
 
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
             DELETE FROM remediation 
-            WHERE remediation_id = {Remediation_Id};
-            ''')
+            WHERE remediation_id = %(remediation_id)s;
+            ''', {"remediation_id" : Remediation_Id})
             Helpers.db.commit()
 
         except Exception as error: 
@@ -330,10 +332,10 @@ class Data_Parser:
     @Helpers.Int_Id_Clense
     def Delete_Source(Source_Id):
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
             DELETE FROM sources 
-            WHERE source_id = {Source_Id};
-            ''')
+            WHERE source_id = %(source_id)s;
+            ''', {"source_id" : Source_Id})
             Helpers.db.commit()
 
         except Exception as error: 
@@ -344,13 +346,16 @@ class Data_Parser:
     def Edit_Remediation(Remediation_Id, Name, Severity, Desc):
         
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                     UPDATE remediation 
-                    SET remediation_name=\'{Name}\',
-                        remediation_sev=\'{Severity}\',
-                        remediation_desc=\"{Desc}\"
-                    WHERE remediation_id=\'{Remediation_Id}\';
-                    ''')
+                    SET remediation_name=\'%(remediation_name)s\',
+                        remediation_sev=\'%(remediation_sev)s\',
+                        remediation_desc=\"%(remediation_desc)s\"
+                    WHERE remediation_id=\'%(remediation_id)s\';
+                    ''', {"remediation_name" : Name,
+                          "remediation_sev" : Severity,
+                          "remediation_desc" : Desc,
+                          "remediation_id" : Remediation_Id})
             Helpers.db.commit()
 
         except Exception as error: 

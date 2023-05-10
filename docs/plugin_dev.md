@@ -28,6 +28,8 @@ This example shows the key information that should be included however any extra
 ### Class structure
 In order for plugins to be ingested properly it has to follow a specific class structure : 
 ```
+from flask import Blueprint, render_template
+
 class Trigger:
     
     def Call():

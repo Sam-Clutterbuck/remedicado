@@ -80,9 +80,10 @@ def Detailed_Hash_Checks(Plugin_Filename):
         with open(f'src/plugins/{Plugin_Filename}/{file}', 'rb') as file_to_hash:
             content = file_to_hash.read()
 
-        hash = hashlib.sha256()
-        hash.update(content)
-        sha_hash = hash.hexdigest()
+        if (type(content) != bytes):
+            content = content.encode()
+        
+        sha_hash = hashlib.sha256(content).hexdigest()
         
         if (sha_hash.lower() != file_hashes[file].lower()):
             return False
@@ -101,9 +102,10 @@ def Import_Check(Discovered_Plugins):
                     with open(f'src/plugins/{filename}/plugin_hashes.yaml', 'rb') as file:
                         content = file.read()
 
-                    hash = hashlib.sha256()
-                    hash.update(content)
-                    sha_hash = hash.hexdigest()
+                    if (type(content) != bytes):
+                        content = content.encode()
+                
+                    sha_hash = hashlib.sha256(content).hexdigest()
 
 
                     if (sha_hash.lower() == validated_plugins[plugin].lower()):

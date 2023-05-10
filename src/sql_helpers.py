@@ -51,11 +51,11 @@ class Helpers:
         ## Check if ip is already in list and return its ID 
         ## If not in list add it and get new ID
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                 SELECT ip_list_id
                 FROM ip_list
-                WHERE ip_list_address=\'{Ip_Address}\';
-                ''')
+                WHERE ip_list_address=\'%(ip_list_address)s\';
+                ''', {"ip_list_address" : Ip_Address})
             
             for found_ip in Helpers.sql_cursor:
                 #print(f"{Ip_Address} exists with id {found_ip[0]}")
@@ -83,17 +83,17 @@ class Helpers:
         if not exists:
 
             try:
-                Helpers.sql_cursor.execute(f'''
+                Helpers.sql_cursor.execute('''
                     INSERT INTO ip_list (ip_list_address)
-                    VALUES (\'{Ip_Address}\');
-                    ''')
+                    VALUES (\'%(ip_address)s\');
+                    ''', {"ip_address" : Ip_Address})
                 Helpers.db.commit()
                 
-                Helpers.sql_cursor.execute(f'''
+                Helpers.sql_cursor.execute('''
                     SELECT ip_list_id
                     FROM ip_list
-                    WHERE ip_list_address=\'{Ip_Address}\';
-                    ''')
+                    WHERE ip_list_address=\'%(ip_address)s\';
+                    ''', {"ip_address" : Ip_Address})
                 
                 for ip_id in Helpers.sql_cursor:
                     #print(f"Added '{Ip_Address}' to ip list with id {ip_id[0]}")
@@ -107,11 +107,11 @@ class Helpers:
     def Report_Id_To_Name(Report_Id):
         
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                     SELECT uploaded_reports_filename, uploaded_reports_hash
                     FROM uploaded_reports
-                    WHERE uploaded_reports_id = {Report_Id};
-                    ''')
+                    WHERE uploaded_reports_id = %(uploaded_reports_id)s;
+                    ''', {"uploaded_reports_id" : Report_Id})
             
             report_dict = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
             return report_dict
@@ -125,11 +125,11 @@ class Helpers:
     def Remediation_Id_To_Name(Remediation_Id):
         
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                     SELECT remediation_name
                     FROM remediation
-                    WHERE remediation_id = {Remediation_Id};
-                    ''')
+                    WHERE remediation_id = %(remediation_id)s;
+                    ''', {"remediation_id" : Remediation_Id})
             
             remediation_dict = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
             return remediation_dict
@@ -143,11 +143,11 @@ class Helpers:
     def Source_Id_To_Name(Source_Id):
         
         try:
-            Helpers.sql_cursor.execute(f'''
+            Helpers.sql_cursor.execute('''
                     SELECT source_name
                     FROM sources
-                    WHERE source_id = {Source_Id};
-                    ''')
+                    WHERE source_id = %(source_id)s;
+                    ''', {"source_id" : Source_Id})
             
             source_dict = Helpers.Sql_To_Dict(Helpers.sql_cursor.description, Helpers.sql_cursor.fetchone())
             return source_dict
