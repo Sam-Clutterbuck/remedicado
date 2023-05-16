@@ -44,4 +44,13 @@ add source:
   alt: ['as']
 
 delete source:
-  alt: [xs]
+  alt: ['xs']
+
+add user:
+  alt: ['au']
+
+delete user:
+  alt: ['du']
+
+password reset:
+  alt: ['pr']

@@ -2,10 +2,13 @@ from yaml import safe_load, YAMLError
 from prettytable import PrettyTable
 from os.path import isfile
 from werkzeug.utils import secure_filename
+from getpass import getpass
 
 from src.data_parser import Data_Parser, Helpers
 from src.importer import Importer
 import src.remedicado_plugins as PLUGINS
+from src.account_controller import Acccount_Controller
+import src.__version__ as Version
 
 class Cli:
 
@@ -23,6 +26,8 @@ class Cli:
         except YAMLError as error:
             print(f"Unable to find commands : {error}")
             quit()
+
+    Authenticated = False
 
 
     #########################################################################################
@@ -72,13 +77,23 @@ class Cli:
 
             print(f"please select [y]es or [n]o?")
 
+    
+    def Authenicate(Func):
+        def Check_Authentication(*Args, **Kwargs):
+            if Cli.Authenticated:
+                return Func(*Args, **Kwargs)
+            else:
+                print("You must be signed in to access this")
+                return
+        return Check_Authentication
+
 
     
     #########################################################################################
 
     def Print_Banner():
 
-        banner = '''
+        banner = f'''
                                                                               
                                                                       
                                                    .....              
@@ -121,7 +136,7 @@ class Cli:
   ██   ▀██▄ ██▄    ▄ ██    ██    ██  ██▄    ▄▀██    ██   ██ ██▄    ▄█   ██  ▀██    ██  ██▄   ▄██
 ▄████▄ ▄███▄ ▀█████▀████  ████  ████▄ ▀█████▀ ▀████▀███▄████▄█████▀▀████▀██▄ ▀████▀███▄ ▀█████▀ 
                                                                                                 
-cli version: 0.0.1
+cli version: {Version.__version__}
 created by: @Sam-Clutterbuck
                                                                                
         '''
@@ -177,6 +192,7 @@ created by: @Sam-Clutterbuck
 
         return
     
+    @Authenicate
     def Run_Plugin():
         if (Cli.Yes_No_Option("Would you like to view installed plugins?")):
             Cli.List_Plugins()
@@ -203,8 +219,22 @@ created by: @Sam-Clutterbuck
 
 
     def Sign_In():
+
+        username = input(f"Enter Username\n")
+        if (username == "q") or (username == "quit"):
+            return 
+        
+        password = getpass(f"Enter Password\n")
+        if (password == "q") or (password == "quit"):
+            return 
+        
+        success = Acccount_Controller.Login(username, password)
+        if success:
+            Cli.Authenticated = True
+
         return
     
+    @Authenicate
     def List_Remediations():
         print(f"Listing Remediations: \n")
         
@@ -214,6 +244,7 @@ created by: @Sam-Clutterbuck
         print(Cli.Format_Table(remediations[0].keys(), remediations))
         return
     
+    @Authenicate
     def List_Sources():
         print(f"Listing Sources: \n")
 
@@ -223,6 +254,7 @@ created by: @Sam-Clutterbuck
         print(Cli.Format_Table(sources[0].keys(), sources))
         return
     
+    @Authenicate
     def Download_Source_Breakdown():
         print(f"Breakdown Source: \n")
 
@@ -243,6 +275,7 @@ created by: @Sam-Clutterbuck
         ### DOWNLOAD SOMEHOW????
         return
 
+    @Authenicate
     def Remediation_Details():
         print(f"Selecting remediation: \n")
 
@@ -297,6 +330,7 @@ Description:
         
         return
         
+    @Authenicate
     def Import_Remediations():
 
         while True:
@@ -324,6 +358,7 @@ Description:
         
         return
     
+    @Authenicate
     def Upload_Reports():
         
         if (Cli.Yes_No_Option("Would you like to view possible remediations?")):
@@ -373,6 +408,7 @@ Description:
 
         return
 
+    @Authenicate
     def Delete_Report():
 
         if (Cli.Yes_No_Option("Would you like to view possible remediations?")):
@@ -402,6 +438,7 @@ Description:
 
         return
     
+    @Authenicate
     def Delete_Remediation():
 
         if (Cli.Yes_No_Option("Would you like to view possible remediations?")):
@@ -419,6 +456,7 @@ Description:
 
         return
 
+    @Authenicate
     def Remediate_Ip():
         if (Cli.Yes_No_Option("Would you like to view possible remediations?")):
             Cli.List_Remediations()
@@ -443,6 +481,7 @@ Description:
         Data_Parser.Remediate_Ip(ip_id, remediation_id)
         return
 
+    @Authenicate
     def Add_Source():
 
         if (Cli.Yes_No_Option("Would you like to view existing sources?")):
@@ -459,6 +498,7 @@ Description:
 
         return
     
+    @Authenicate
     def Delete_Source():
 
         if (Cli.Yes_No_Option("Would you like to view possible sources?")):
@@ -470,6 +510,41 @@ Description:
 
         return
 
+    @Authenicate
+    def Add_User():
+        
+        username = input(f"Enter Username\n")
+        if (username == "q") or (username == "quit"):
+            return 
+        
+        password = getpass(f"Enter Password\n")
+        if (password == "q") or (password == "quit"):
+            return 
+        
+        Acccount_Controller.Create_Account(username, password)
+        return
+
+    @Authenicate
+    def Pasword_Reset():
+        username = input(f"Enter Username\n")
+        if (username == "q") or (username == "quit"):
+            return 
+        
+        password = getpass(f"Enter New Password for {username}\n")
+        if (password == "q") or (password == "quit"):
+            return 
+        
+        Acccount_Controller.Password_Reset(username, password)
+        return
+    
+    @Authenicate
+    def Delete_User():
+        username = input(f"Enter Username\n")
+        if (username == "q") or (username == "quit"):
+            return 
+        
+        Acccount_Controller.Delete_user(username)
+        return
 
     COMMANDS['login'].update({'func':Sign_In})
     COMMANDS['quit'].update({'func':quit})
@@ -487,6 +562,9 @@ Description:
     COMMANDS['run plugin'].update({'func':Run_Plugin})
     COMMANDS['add source'].update({'func':Add_Source})
     COMMANDS['delete source'].update({'func':Delete_Source})
+    COMMANDS['add user'].update({'func':Add_User})
+    COMMANDS['delete user'].update({'func':Delete_User})
+    COMMANDS['password reset'].update({'func':Pasword_Reset})
 
 
     

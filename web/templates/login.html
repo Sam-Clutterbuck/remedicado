@@ -1,0 +1,30 @@
+{% extends "base.html" %}  
+{% block title %}login{% endblock %}  
+{% block headings %}{% endblock %}
+
+
+{% block content %}
+
+
+<div class=" container">
+    <div class="stack login_box">
+        <h1>Login</h1>
+
+        {% for message in get_flashed_messages() %}
+            <div class="alert">
+                {{message}}
+            </div>
+                
+            {% endfor %}
+
+        <form class="login_form" method="POST" enctype="multipart/form-data">
+            <input type="text" placeholder="enter username" name="username"/>
+            <input type="password" placeholder="enter password" name="password"/>
+            
+            <button class="btn">login</button>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}  

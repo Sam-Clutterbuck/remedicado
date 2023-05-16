@@ -1,5 +1,0 @@
-remediation_id,remediation_source_id,remediation_last_updated,reported_ips,affected_ips
-1,654321,2023-04-24,2,2
-2,123456,2023-04-24,3,2
-3,424442,2023-04-24,2,2
-7,157261,2023-04-24,5,5

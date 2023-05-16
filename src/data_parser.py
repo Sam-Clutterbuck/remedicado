@@ -259,8 +259,8 @@ class Data_Parser:
                     UPDATE affected_ips 
                     SET remediated=true,
                         remediated_previously=true
-                    WHERE remediation_id=\'%(remediation_id)s\'
-                    AND ip_list_id=\'%(ip_list_id)s\';
+                    WHERE remediation_id=%(remediation_id)s
+                    AND ip_list_id=%(ip_list_id)s;
                     ''', {"remediation_id" : Remediation_Id, "ip_list_id": Ip_Id})
             Helpers.db.commit()
 
@@ -272,7 +272,7 @@ class Data_Parser:
         try:
             Helpers.sql_cursor.execute('''
                     INSERT INTO sources (source_name) 
-                    VALUES (\'%(source_name)s\');
+                    VALUES (%(source_name)s);
                     ''', {"source_name" : Source_Name})
             Helpers.db.commit()
 
@@ -348,10 +348,10 @@ class Data_Parser:
         try:
             Helpers.sql_cursor.execute('''
                     UPDATE remediation 
-                    SET remediation_name=\'%(remediation_name)s\',
-                        remediation_sev=\'%(remediation_sev)s\',
-                        remediation_desc=\"%(remediation_desc)s\"
-                    WHERE remediation_id=\'%(remediation_id)s\';
+                    SET remediation_name=%(remediation_name)s,
+                        remediation_sev=%(remediation_sev)s,
+                        remediation_desc=%(remediation_desc)s
+                    WHERE remediation_id=%(remediation_id)s;
                     ''', {"remediation_name" : Name,
                           "remediation_sev" : Severity,
                           "remediation_desc" : Desc,

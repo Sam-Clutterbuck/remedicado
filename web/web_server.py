@@ -1,9 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file, flash
+from flask import Flask, render_template, request, redirect, url_for, send_file, flash, session
 from werkzeug.utils import secure_filename
 from re import search
+from functools import wraps
+from secrets import token_hex
+from datetime import timedelta
 import importlib
 
-from src import Data_Parser, Importer, Helpers, Plugins
+from src import Data_Parser, Importer, Helpers, Plugins, Acccount_Controller, Version
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -11,10 +14,12 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 #####################
 #Globals
 
-app.config['UPLOAD_FOLDER'] = "data/uploads/"
+app.config['UPLOAD_FOLDER'] = "data/uploads/" 
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 #10MB max limit
 
-app.secret_key = "TEST"
+app.secret_key = token_hex(64)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=Helpers.CONFIG['session_life'])
+app.config['Version'] = Version.__version__
 #####################
 
 def Start_Web_App():
@@ -29,6 +34,26 @@ def Page_Not_Found(error):
     return render_template("./404.html")
 
 ########################################################################
+# Authentication Decorator
+
+def Authenticate(Func):
+    @wraps(Func)
+    def Authentication_Confirmation(*Args, **Kwargs):
+
+        if "logged_in" not in session.keys() or "user" not in session.keys():
+            flash(f"Attempted to access restricted page")
+            return redirect(f"{url_for('Login_Page')}")
+
+
+        if session['logged_in'] and session['user'] is not None:
+            return Func(*Args, **Kwargs)
+        
+        flash(f"Attempted to access restricted page")
+        return redirect(f"{url_for('Login_Page')}")
+    return Authentication_Confirmation
+
+
+########################################################################
 # Home page
 
 @app.route("/home")
@@ -38,10 +63,140 @@ def Home():
     return render_template("./home.html")
 
 ########################################################################
+# Login Page
+
+@app.route("/login", methods=['POST','GET'])
+def Login_Page():
+
+    if (request.method == 'POST'):
+    
+        username=request.form['username'].strip()
+        password=request.form['password']
+
+        if username is None or password is None or (username == "") or (password == ""):
+            flash(f"Username or Password is Incorrect")
+            return render_template("./login.html")
+
+
+        if Acccount_Controller.Login(username, password):
+            session['logged_in'] = True
+            session['user'] = username
+            session.permanent = True
+            return redirect(f"{url_for('Home')}")
+
+
+        flash(f"Username or Password is Incorrect")
+        return render_template("./login.html")
+        
+
+    return render_template("./login.html")
+
+@app.route("/logout")
+def Logout():
+    session.pop('logged_in', default=False)
+    session.pop('user', default=None)
+    return redirect(f"{url_for('Home')}")
+
+
+########################################################################
+# settings pages
+
+@app.route("/settings")
+@Authenticate
+def Settings():
+    username_list = Acccount_Controller.List_Users()
+    source_list = Data_Parser.List_Sources()
+
+    return render_template("./settings.html",
+                           Username_List=username_list,
+                           Source_List=source_list)
+
+@app.route("/settings/delete_user", methods=['POST'] )
+@Authenticate
+def Delete_User():
+
+    if (request.method == 'POST'):
+    
+        username=request.form['username'].strip()
+        Acccount_Controller.Delete_user(username)
+
+    return redirect(f"{url_for('Settings')}")
+
+@app.route("/settings/edit_user", methods=['POST'] )
+@Authenticate
+def Edit_User():
+
+    if (request.method == 'POST'):
+    
+        username=request.form['username'].strip()
+        password=request.form['password']
+
+        if username is None or password is None or (username == "") or (password == ""):
+            flash(f"Invalid Password")
+            return redirect(f"{url_for('Settings')}#{username}")
+
+
+        if not Acccount_Controller.Password_Reset(username, password):
+            flash(f"Password reset Failed")
+
+        return redirect(f"{url_for('Settings')}#{username}")
+
+
+    return redirect(f"{url_for('Settings')}")
+
+@app.route("/settings/add_user", methods=['POST'] )
+@Authenticate
+def Add_User():
+
+    if (request.method == 'POST'):
+    
+        username=request.form['username'].strip()
+        password=request.form['password']
+
+        if username is None or password is None or (username == "") or (password == ""):
+            flash(f"Invalid Username or Password")
+            return redirect(f"{url_for('Settings')}")
+
+
+        if not Acccount_Controller.Create_Account(username, password):
+            flash(f"Failed to create account")
+
+    return redirect(f"{url_for('Settings')}")
+
+
+@app.route("/settings/delete_source", methods=['POST'] )
+@Authenticate
+def Delete_Source():
+    if (request.method == 'POST'):
+
+        source_id=request.form['source_id']
+        Data_Parser.Delete_Source(source_id)
+
+    return redirect(f"{url_for('Settings')}")
+
+@app.route("/settings/add_source", methods=['POST'] )
+@Authenticate
+def Add_Source():
+
+    if (request.method == 'POST'):
+    
+        source_name=request.form['source_name'].strip()
+
+        if source_name is None or (source_name == "") :
+            flash(f"Invalid source name")
+            return redirect(f"{url_for('Settings')}")
+
+
+        Data_Parser.Add_Source(source_name)
+
+    return redirect(f"{url_for('Settings')}")
+
+########################################################################
 # Remediation pages
 
 
 @app.route("/remediations")
+@Authenticate
 def Remediations_List():
 
     remediation_list = Data_Parser.Get_Remediation_List()
@@ -77,6 +232,7 @@ def Remediations_List():
     return render_template("./remediations.html", Header_Length=len(headers), Headings=headers, data=data, Sources=source_list)
 
 @app.route("/remediations/details/<ID>")
+@Authenticate
 def Remediation_Details(ID):
 
     remediation_details = Data_Parser.Get_Remediation_Details(ID)
@@ -154,6 +310,7 @@ def Icon_Selector(Severity, Remediated_Percent, Policy_Percent):
     return icon_name
 
 @app.route("/remediations/source_breakdown", methods=['POST'])
+@Authenticate
 def Source_Breakdown():
     source_id=request.form['source_id']
 
@@ -168,11 +325,13 @@ def Source_Breakdown():
     
 
     file_name, remediation_dict = Data_Parser.Get_Source_Breakdown(source_id)
-    return send_file(f"../data/{file_name}", as_attachment=True) 
+
+    return send_file(f"../data/files/{file_name}", as_attachment=True) 
         
 
 
 @app.route("/remediations/details/<ID>/upload_report", methods=['POST'])
+@Authenticate
 def Upload_Report(ID):
 
     allowed_extensions = ['pdf']
@@ -207,9 +366,9 @@ def Upload_Report(ID):
 
         return redirect(f"{url_for('Remediation_Details', ID=ID)}#vuln_reports")
 
-    print()
 
 @app.route("/remediations/details/<ID>/download_report/<Report_Id>")
+@Authenticate
 def Report_Download(ID, Report_Id):
 
     file_info = Helpers.Report_Id_To_Name(Report_Id)
@@ -222,6 +381,7 @@ def Report_Download(ID, Report_Id):
     return send_file(f"../data/uploads/{file_info['uploaded_reports_filename']}", as_attachment=True) 
 
 @app.route("/remediations/details/<ID>/remediate_ips", methods=['POST'])
+@Authenticate
 def Remediate_Ips(ID):
 
     selected_ips = request.form['selected_ips']
@@ -240,8 +400,6 @@ def Remediate_Ips(ID):
         if valid is not None:
             secure_ips.append(ip)
 
-    print(secure_ips)
-
 
     valid_ip_ids = []
     for ip in secure_ips:
@@ -258,6 +416,7 @@ def Remediate_Ips(ID):
 
 
 @app.route("/remediations/details/<ID>/download_report/<Report_Id>", methods=['POST'])
+@Authenticate
 def Delete_Report(ID, Report_Id):
 
     Data_Parser.Delete_Report(Report_Id)
@@ -265,6 +424,7 @@ def Delete_Report(ID, Report_Id):
     return redirect(f"{url_for('Remediation_Details', ID=ID)}#vuln_reports")
 
 @app.route("/remediations/details/<ID>/download_remediation", methods=['POST'])
+@Authenticate
 def Delete_Remediation(ID):
     
     Data_Parser.Delete_Remediation(ID)
@@ -272,6 +432,7 @@ def Delete_Remediation(ID):
     return redirect(url_for('Remediations_List'))
 
 @app.route("/remediations/details/<ID>/edit")
+@Authenticate
 def Edit_Remediation_Details(ID):
 
     remediation_details = Data_Parser.Get_Remediation_Details(ID)
@@ -283,6 +444,7 @@ def Edit_Remediation_Details(ID):
                            Remediation_Sev=remediation_details['remediation_sev'])
 
 @app.route("/remediations/details/<ID>/edit/commit", methods=['POST'])
+@Authenticate
 def Commit_Remediation_Edit(ID):
     
     remediation_name = request.form['remediation_name']
@@ -305,6 +467,7 @@ def Import():
     return render_template("./import.html")
 
 @app.route("/import/upload", methods=['POST'])
+@Authenticate
 def Upload_Import():
 
     allowed_extensions = ['csv']
@@ -339,6 +502,7 @@ def Upload_Import():
 # Plugins page
 
 @app.route("/plugins")
+@Authenticate
 def Plugins_Page():
 
     return render_template("./plugins.html", Installed_Plugins = web_plugins)

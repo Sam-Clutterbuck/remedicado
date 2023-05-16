@@ -515,3 +515,33 @@ body::-webkit-scrollbar {
     width: 100%;
     padding: 1rem;
     overflow-wrap: break-word;}
+
+  .login_form{
+    padding: 4rem;
+  }
+
+  .login_form *{
+    display: flex;
+    margin: 1rem;
+  }
+
+  .login_form input{
+    background-color: var(--base-80);
+    color: var(--off-white);
+    border-color: var(--base-100);
+    font-size: 1rem;
+
+    &::placeholder {
+      color: var(--off-white);
+      opacity: 1;
+    }
+
+  }
+
+  .login_box {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 5rem;
+    background-color: var(--base-60);
+    box-shadow: .5rem .5rem 10rem -.5rem var(--base-90);
+  }

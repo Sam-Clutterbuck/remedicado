@@ -22,8 +22,8 @@ class Helpers:
 
     db = mysql.connector.connect(
     host=CONFIG['host'],
-    user=SECRETS.user,
-    passwd=SECRETS.passwd,
+    user=SECRETS.user, #CONFIG['db_user']
+    passwd=SECRETS.passwd, #CONFIG['db_pass']
     database=CONFIG['database']
     )
 
@@ -54,12 +54,11 @@ class Helpers:
             Helpers.sql_cursor.execute('''
                 SELECT ip_list_id
                 FROM ip_list
-                WHERE ip_list_address=\'%(ip_list_address)s\';
+                WHERE ip_list_address=%(ip_list_address)s;
                 ''', {"ip_list_address" : Ip_Address})
-            
-            for found_ip in Helpers.sql_cursor:
-                #print(f"{Ip_Address} exists with id {found_ip[0]}")
-                return found_ip[0]
+
+            for found_ip in Helpers.sql_cursor.fetchone():
+                return found_ip
 
         except Exception as error: 
             print(error)
@@ -76,8 +75,8 @@ class Helpers:
 
         returned_id = Helpers.Ip_To_Id(Ip_Address)
         if returned_id is not None:
-            return returned_id
             exists = True
+            return returned_id
 
 
         if not exists:
@@ -85,19 +84,18 @@ class Helpers:
             try:
                 Helpers.sql_cursor.execute('''
                     INSERT INTO ip_list (ip_list_address)
-                    VALUES (\'%(ip_address)s\');
+                    VALUES (%(ip_address)s);
                     ''', {"ip_address" : Ip_Address})
                 Helpers.db.commit()
                 
                 Helpers.sql_cursor.execute('''
                     SELECT ip_list_id
                     FROM ip_list
-                    WHERE ip_list_address=\'%(ip_address)s\';
+                    WHERE ip_list_address=%(ip_address)s;
                     ''', {"ip_address" : Ip_Address})
                 
-                for ip_id in Helpers.sql_cursor:
-                    #print(f"Added '{Ip_Address}' to ip list with id {ip_id[0]}")
-                    return ip_id[0]
+                for ip_id in Helpers.sql_cursor.fetchone():
+                    return ip_id
                 
             except Exception as error: 
                 print(error)

@@ -1,0 +1,138 @@
+{% extends "base.html" %}  
+{% block title %}settings{% endblock %}  
+{% block headings %}{% endblock %}
+
+
+{% block content %}
+
+
+<div class="container">
+    <div class="hero">
+        <div class="container">
+            <div>
+                <h1>Welcome '{{session['user']}}'</h1>
+            </div>
+            <div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="hero full-width">
+        <h1>Users</h1>
+
+        <label class="collapse shaped" for="_add_user" style="display: inline;">Add User</label>
+        <input id="_add_user" type="checkbox">    
+        <div class="expander" style="margin-bottom: 3rem;">
+            <form action="{{url_for('Add_User')}}" method="POST" enctype="multipart/form-data">
+                <input type="text" placeholder="enter username" name="username"/>
+                <input type="password" placeholder="enter password" name="password"/>
+                
+                <button class="btn">Create User</button>
+            </form>
+        </div>
+
+
+        {% for message in get_flashed_messages() %}
+        <div class="alert">
+            {{message}}
+        </div>
+            
+        {% endfor %}
+
+        <table style="margin-top: 2rem;" id="table" class="full-width">
+            <tr>
+                <th>user</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+            {% for user in Username_List %}
+            <tr>
+
+                <td class="header-column" id="{{Username_List[user]['username']}}">{{Username_List[user]['username']}}</td>
+                
+                <td>
+                    <label class="collapse" for="_{{Username_List[user]['username']}}_reset" style="display: inline;"><img src="/static/assets/icons/edit.svg" alt="delete icon"></label>
+                    <input id="_{{Username_List[user]['username']}}_reset" type="checkbox">    
+                    <div class="expander" style="margin-bottom: 3rem;">
+                        <form action="{{url_for('Edit_User')}}" method="POST">
+                            <input type="hidden" id="username" name="username" value="{{Username_List[user]['username']}}">
+                            <label for="password">Reset Password:</label>
+                            <input id="password" type="password" placeholder="enter new password" name="password"/>
+                            <input class="btn" type="submit" value="reset">
+                        </form>
+                    </div>
+                </td>
+                <td>
+                    <label class="collapse" for="_{{Username_List[user]['username']}}" style="display: inline;"><img src="/static/assets/icons/delete.svg" alt="delete icon"></label>
+                    <input id="_{{Username_List[user]['username']}}" type="checkbox">    
+                    <div class="expander" style="margin-bottom: 3rem;">
+                        <form action="{{url_for('Delete_User')}}" method="POST">
+                            <input type="hidden" id="username" name="username" value="{{Username_List[user]['username']}}">
+                            <p>Are you sure you want to delete {{Username_List[user]['username']}}?</p>
+                            <input class="btn" type="submit" value="Delete">
+                        </form>
+                    </div>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="hero full-width">
+        <h1>Sources</h1>
+
+        <label class="collapse shaped" for="_add_source" style="display: inline;">Add Source</label>
+        <input id="_add_source" type="checkbox">    
+        <div class="expander" style="margin-bottom: 3rem;">
+            <form action="{{url_for('Add_Source')}}" method="POST" enctype="multipart/form-data">
+                <input type="text" placeholder="enter source name" name="source_name"/>
+                
+                <button class="btn">Add Source</button>
+            </form>
+        </div>
+
+
+        {% for message in get_flashed_messages() %}
+        <div class="alert">
+            {{message}}
+        </div>
+            
+        {% endfor %}
+
+        <table style="margin-top: 2rem;" id="table" class="full-width">
+            <tr>
+                <th>Source</th>
+                <th>Delete</th>
+            </tr>
+            {% for source in Source_List %}
+            <tr>
+
+                <td class="header-column" id="{{Source_List[source]['source_name']}}">{{Source_List[source]['source_name']}}</td>
+                
+                <td>
+                    <label class="collapse" for="_{{Source_List[source]['source_name']}}" style="display: inline;"><img src="/static/assets/icons/delete.svg" alt="delete icon"></label>
+                    <input id="_{{Source_List[source]['source_name']}}" type="checkbox">    
+                    <div class="expander" style="margin-bottom: 3rem;">
+                        <form action="{{url_for('Delete_Source')}}" method="POST">
+                            <input type="hidden" id="source_id" name="source_id" value="{{Source_List[source]['source_id']}}">
+                            <p>Are you sure you want to delete {{Source_List[source]['source_name']}}?</p>
+                            <input class="btn" type="submit" value="Delete">
+                        </form>
+                    </div>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}  

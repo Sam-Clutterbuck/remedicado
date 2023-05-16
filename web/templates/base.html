@@ -15,60 +15,92 @@
     
 
         <nav class="navbar">
-            <ul class="navbar-nav">
-                <li class="logo">
-                    <a href="{{url_for('Home')}}" class="nav-link">
-                        <img src="/static/assets/Remedicado_logo.png" alt="Remedicado logo">
-                    </a>
-                    <a href="{{url_for('Home')}}" class="nav-link">
-                        <span class="link-text logo-text">Remedicado</span>
-                    </a>
+            <div class="nav-bg">
+                <ul class="navbar-nav">
+                    <li class="logo">
+                        <a href="{{url_for('Home')}}" class="nav-link">
+                            <img src="/static/assets/Remedicado_logo.png" alt="Remedicado logo">
+                        </a>
+                        <a href="{{url_for('Home')}}" class="nav-link">
+                            <span class="link-text logo-text">Remedicado</span>
+                        </a>
+                        <p class="link-text version">version {{config['Version']}}</p>
+                        
+                    </li>
+
+                    <li class="nav-item">
+                        <div class="seperator"></div>
+                        <a href="{{url_for('Home')}}" class="nav-link">
+                            <img src="/static/assets/icons/home.svg" alt="home icon">
+                            <span class="link-text">home</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <div class="seperator"></div>
+                        <a href="{{url_for('Remediations_List')}}" class="nav-link">
+                            <img src="/static/assets/icons/remediations.svg" alt="remediatons icon">
+                            <span class="link-text">remediatons</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <div class="seperator"></div>
+                        <a href="{{url_for('Import')}}" class="nav-link">
+                            <img src="/static/assets/icons/upload.svg" alt="import icon">
+                            <span class="link-text">import</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <div class="seperator"></div>
+                        <a href="{{url_for('Plugins_Page')}}" class="nav-link">
+                            <img src="/static/assets/icons/plugin.svg" alt="plugins icon">
+                            <span class="link-text">plugins</span>
+                        </a>
+                    </li>
                     
-                </li>
+                    <li class="nav-item user_expand">
+                        <div class="seperator"></div>
 
-                <li class="nav-item">
-                    <div class="seperator"></div>
-                    <a href="{{url_for('Home')}}" class="nav-link">
-                        <img src="/static/assets/icons/home.svg" alt="home icon">
-                        <span class="link-text">home</span>
-                    </a>
-                </li>
+                        {% if session['logged_in'] %}
+                            <a class="nav-link">
+                                <img src="/static/assets/icons/expand.svg" alt="expand icon">
+                                <span class="link-text">account</span>
+                            </a>
 
-                <li class="nav-item">
-                    <div class="seperator"></div>
-                    <a href="{{url_for('Remediations_List')}}" class="nav-link">
-                        <img src="/static/assets/icons/remediations.svg" alt="remediatons icon">
-                        <span class="link-text">remediatons</span>
-                    </a>
-                </li>
+                            <ul class="expand_nav">
+                                <li class="nav-item">
+                                    <a href="{{url_for('Settings')}}" class="nav-link">
+                                        <img src="/static/assets/icons/settings.svg" alt="settings icon">
+                                        <span class="link-text">settings</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{url_for('Logout')}}" class="nav-link">
+                                        <img src="/static/assets/icons/sign_out.svg" alt="sign out icon">
+                                        <span class="link-text">sign out</span>
+                                    </a>
+                                </li>
+                            </ul>
 
-                <li class="nav-item">
-                    <div class="seperator"></div>
-                    <a href="{{url_for('Import')}}" class="nav-link">
-                        <img src="/static/assets/icons/upload.svg" alt="import icon">
-                        <span class="link-text">import</span>
-                    </a>
-                </li>
+                        {% else %}
+                            <a href="{{url_for('Login_Page')}}" class="nav-link">
+                                <img src="/static/assets/icons/sign_in.svg" alt="sign in icon">
+                                <span class="link-text">sign in</span>
+                            </a>
+                        {% endif %}
+                        
 
-                <li class="nav-item">
-                    <div class="seperator"></div>
-                    <a href="{{url_for('Plugins_Page')}}" class="nav-link">
-                        <img src="/static/assets/icons/plugin.svg" alt="plugins icon">
-                        <span class="link-text">plugins</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <div class="seperator"></div>
-                    <a href="#" class="nav-link">
-                        <img src="/static/assets/icons/sign_in.svg" alt="sign in icon">
-                        <span class="link-text">sign in</span>
-                    </a>
-                </li>
-            </ul>
+                        
+                    </li>
+                </ul>
+            <div>
         </nav>
+        
 
         <main>
+
             {% block content %}
             {% endblock %}
 

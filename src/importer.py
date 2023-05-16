@@ -62,7 +62,7 @@ class Importer:
             Helpers.sql_cursor.execute('''
                 SELECT ip_list_id
                 FROM affected_ips
-                WHERE remediation_id=\'%(remediation_id)s\';
+                WHERE remediation_id=%(remediation_id)s;
                 ''', {"remediation_id" : SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID']})
             
             ip_list = Helpers.sql_cursor.fetchall()
@@ -90,9 +90,9 @@ class Importer:
                     Helpers.sql_cursor.execute('''
                         UPDATE affected_ips 
                         SET remediated=false,
-                            last_seen=\'%(last_seen)s\'
-                        WHERE remediation_id=\'%(remediation_id)s\'
-                        AND ip_list_id=\'%(ip_list_id)s\';
+                            last_seen=%(last_seen)s
+                        WHERE remediation_id=%(remediation_id)s
+                        AND ip_list_id=%(ip_list_id)s ;
                         ''', {"last_seen": datetime.now().strftime('%Y-%m-%d'),
                               "remediation_id": SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID'],
                               "ip_list_id": ip_id})
@@ -113,11 +113,11 @@ class Importer:
                             remediated_previously
                             )
                         VALUES (
-                            \'%(remediation_id)s\',
-                            \'%(ip_list_id)s\', 
-                            \'%(date_reported)s\', 
+                            %(remediation_id)s,
+                            %(ip_list_id)s, 
+                            %(date_reported)s, 
                             false,
-                            \'%(last_seen)s\', 
+                            %(last_seen)s, 
                             false
                             );
                         ''', {"remediation_id" : SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID'],
@@ -147,8 +147,8 @@ class Importer:
                         UPDATE affected_ips 
                         SET remediated=true,
                             remediated_previously=true
-                        WHERE remediation_id=\'%(remediation_id)s\'
-                        AND ip_list_id=\'%(ip_list_id)s\';
+                        WHERE remediation_id=%(remediation_id)s
+                        AND ip_list_id=%(ip_list_id)s;
                         ''', {"remediation_id" : SELF.UPLOAD_DICT[Source]['SQL_REPORTED_ID'],
                               "ip_list_id" : recorded_ip[0]})
                     Helpers.db.commit()
@@ -173,7 +173,7 @@ class Importer:
                 Helpers.sql_cursor.execute('''
                     SELECT source_id
                     FROM sources 
-                    WHERE source_name=\'%(source_name)s\';
+                    WHERE source_name=%(source_name)s;
                     ''', {"source_name" : source_name})
                 
                 source_id = Helpers.sql_cursor.fetchone()
@@ -197,7 +197,7 @@ class Importer:
                 Helpers.sql_cursor.execute('''
                     SELECT remediation_id, remediation_name, remediation_source_id 
                     FROM remediation 
-                    WHERE remediation_source=\'%(remediation_source)s\';
+                    WHERE remediation_source=%(remediation_source)s;
                     ''', {"remediation_source" : SELF.UPLOAD_DICT[source]['SQL_SOURCE_ID']})
                 
                 ## Check if the current source is already in database via the source id
@@ -234,13 +234,13 @@ class Importer:
                             remediation_source_id
                             )
                         VALUES (
-                            \'%(remediation_name)s\',
-                            \"%(remediation_desc)s\",
-                            \'%(remediation_sev)s\',
-                            \'%(remediation_date_reported)s\',
-                            \'%(remediation_last_updated)s\',
-                            \'%(remediation_source)s\',
-                            \'%(remediation_source_id)s\'
+                            %(remediation_name)s,
+                            %(remediation_desc)s,
+                            %(remediation_sev)s,
+                            %(remediation_date_reported)s,
+                            %(remediation_last_updated)s,
+                            %(remediation_source)s,
+                            %(remediation_source_id)s
                         );
                         ''', {"remediation_name" : SELF.UPLOAD_DICT[source]["name"], 
                             "remediation_desc" : SELF.UPLOAD_DICT[source]["desc"], 
@@ -260,8 +260,8 @@ class Importer:
                     Helpers.sql_cursor.execute('''
                         SELECT remediation_id
                         FROM remediation 
-                        WHERE remediation_source=\'%(remediation_source)s\'
-                        AND remediation_source_id=\'%(remediation_source_id)s\';
+                        WHERE remediation_source=%(remediation_source)s
+                        AND remediation_source_id=%(remediation_source_id)s;
                         ''', {"remediation_source" : SELF.UPLOAD_DICT[source]['SQL_SOURCE_ID'],
                               "remediation_source_id" : SELF.UPLOAD_DICT[source]['source_id']})
                     
@@ -285,8 +285,8 @@ class Importer:
                     ## If already in db then add any potential new ips to list
                     Helpers.sql_cursor.execute('''
                             UPDATE remediation 
-                            SET remediation_last_updated=\'%(remediation_last_updated)s\'
-                            WHERE remediation_id=\'%(remediation_id)s\';
+                            SET remediation_last_updated=%(remediation_last_updated)s
+                            WHERE remediation_id=%(remediation_id)s;
                             ''', {"remediation_last_updated" : datetime.now().strftime('%Y-%m-%d'),
                                   "remediation_id" : SELF.UPLOAD_DICT[source]["SQL_REPORTED_ID"]})
                     Helpers.db.commit()
@@ -312,10 +312,10 @@ class Importer:
                             uploaded_reports_hash
                             )
                         VALUES (
-                            \'%(remediation_id)s\',
-                            \'%(uploaded_reports_filename)s\', 
-                            \'%(uploaded_reports_upload_date)s\',
-                            \'%(uploaded_reports_hash)s\'
+                            %(remediation_id)s,
+                            %(uploaded_reports_filename)s, 
+                            %(uploaded_reports_upload_date)s,
+                            %(uploaded_reports_hash)s
                             );
                         ''', {"remediation_id" : Remediation_Id, 
                             "uploaded_reports_filename" : Filename, 

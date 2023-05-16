@@ -67,6 +67,17 @@ CREATE TABLE `uploaded_reports` (
 );
 ```
 
+```
+CREATE TABLE `accounts` (
+  `account_id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `salt` varchar(128) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`account_id`)
+  
+);
+```
+
 ## Remediation table
 The remediation table stores the core remediation data for the program.
 
@@ -111,4 +122,13 @@ To overcome this the source id should be a unique id provided by your source of 
 
 The Source list only contains 2 values
 - `source_id` - This is the unique id of the source referenced in the remediation table
- - `source_name` - This is the human readable name of the source that should be found in the imported report
+- `source_name` - This is the human readable name of the source that should be found in the imported report
+
+### Accounts
+The Accounts table is purely for storing the user accounts used to access the system
+
+The accounts table contains 3 values
+- `username` - the username for the user
+- `salt` - the salt to be added to user password
+- `password` - the hashed and salted password
+

@@ -1,2 +1,8 @@
+# MySQL database information
 host: localhost
 database: remedicado
+db_user: username
+db_pass: password
+
+#session length before needing to log in again [expressed in hours]
+session_life: 3 
