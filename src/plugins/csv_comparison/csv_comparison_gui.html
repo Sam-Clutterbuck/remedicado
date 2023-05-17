@@ -85,6 +85,26 @@
                     
                 </table>
 
+                <div style="border: solid 1px var(--off-black); padding: 1rem">
+                    <h4>Source ID list</h4>
+                    <br>
+                    <p id="Result_ID_list">{% for row in Analysis %}{{Analysis[row]}}, {% endfor %}</p>
+                    <button class="btn" onclick="Copy_To_Clip()">Copy ids</button>
+                </div>
+               
+
+                <script>
+                    function Copy_To_Clip() {
+                    // Get the text field
+                    var copyText = document.getElementById("Result_ID_list");
+                    
+                    navigator.clipboard.writeText(copyText.innerHTML);
+                    
+                    alert("Copied ids to clipboard ");
+                    
+                    }
+                </script>
+
                 
                 
             </div>

@@ -11,7 +11,7 @@
 
 **Version:** 0.0.1 
 
- **Hash:** *17E1F988F5A26460858349FD3DECA64C6041651191B977BF79760395CCE2585A*
+ **Hash:** *FECF19E3E5E3FE6160565075EC4C7013C9D7088E5180DCF5938F06A555E0C4A8*
 
 ### Description
 This plugin takes a source breakdown csv provided by remedicado, containing a list of all source ids and their remediation stats; and compares it with a top xxxx csv from your selected source, containing a list of vulnerabilities found by source ID. The outcome of the comparison is a merged csv containing all of the provided source vulnerabilities and whether they have been reported or not and if so, lists how many ips have been reported numerically. Once produced the csv can be opened in any excel sheet viewing program to be used to determine what vulnerabilities to focus on.
