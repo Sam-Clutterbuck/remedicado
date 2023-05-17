@@ -1,5 +1,6 @@
 {% extends "base.html" %}  
 {% block title %}Template Plugin{% endblock %}  
+{% block headings %} <script src="/static/table_href.js"></script> {% endblock %}
 
 
 {% block content %}
@@ -54,5 +55,108 @@
 
     </div>
 </div>
+
+{% if Comparison_Table == True %}
+    <div class=" container">
+        <div class="hero full-width">
+            <!--Table_Results=None-->
+            <h1>Comparison Results</h1>
+
+            <form action="{{url_for('csv_comparison.Csv_Comparison_Start')}}" method="POST" style="display: inline;">
+                <input class="btn" type="submit" value="Download Results">
+            </form>
+
+            <label class="collapse shaped" for="_analysis" style="display: inline; margin-left: 2rem;">View Recomended Updates</label>
+            <input id="_analysis" type="checkbox">    
+            <div class="expander" style="margin-bottom: 3rem;">
+                <p class="bold">The following sources have changes in ip counts and should be updated</p>
+
+                <table>
+                    <tr>
+                        <th>Remediation_Name</th>
+                        <th>Source_id</th>
+                    </tr>
+                    {% for row in Analysis %}
+                        <tr>
+                            <td class="header-column">{{row}}</td>
+                            <td class="header-column">{{Analysis[row]}}</td>
+                        </tr>
+                    {% endfor %}
+                    
+                </table>
+
+                
+                
+            </div>
+
+            <table style="table-layout: auto; margin-top: 2rem;" id="table" class="full-width">
+                <tr>
+                    <th onclick="sortTable(0)">Remediation_Name</th>
+                    <th onclick="sortTable(1)">Source_id</th>
+                    <th onclick="sortTable(2)">Severity</th>
+                    <th onclick="sortTable(3)">Reported</th>
+                    <th onclick="sortTable(4)">Found/Reported/Affected ips</th>
+                    <th onclick="sortTable(5)">Last Updated</th>
+                </tr>
+                {% for row in Table_Results %}
+                <tr>
+
+                    <td class="header-column" id="{{row[0]}}">{{row[0]}}</td>
+                    <td>{{row[1]}}</td>
+
+                    {% if row[2] >= 9 %}
+                    <!-- Critical severity (9+)-->
+
+                    <td class="severity">
+                        <span class="critical">{{ row[2] }}</span>
+                    </td>
+
+                    {% elif row[2] >= 7 %}
+                    <!-- High severity (7+)-->
+
+                    <td class="severity">
+                        <span class="high">{{ row[2] }}</span>
+                    </td>
+
+                    {% elif row[2] >= 4 %}
+                    <!-- medium severity (4+)-->
+
+                    <td class="severity">
+                        <span class="medium">{{ row[2] }}</span>
+                    </td>
+
+                    {% else %}
+                    <!-- low / info severity (>4)-->
+
+                    <td class="severity">
+                        <span class="low">{{ row[2] }}</span>
+                    </td>
+                    
+                    
+                    {% endif %}
+
+                    {% if row[4] == True %}
+                    <td><span class="true">Yes</span></td>
+                    {% else %}
+                    <td><span class="false">No</span></td>
+                    {% endif %}
+
+                    {% if row[7] == "Not Reported"%}
+                    <td>{{row[3]}}/0/0</td>
+                    {% else %}
+                    <td>{{row[3]}}/{{row[7]}}/{{row[8]}}</td>
+                    {% endif %}
+                    
+                    <td>{{row[6]}}</td>
+                    
+
+                </tr>
+                {% endfor %}
+            </table>
+
+
+        </div>
+    </div>
+{% endif %}
 
 {% endblock %}  

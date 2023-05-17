@@ -153,3 +153,18 @@ class CSV_Comparison:
             formatted_table.add_row(cropped)
 
         print(formatted_table)
+
+
+    def Analyse_Results(Comparison_Table):
+        
+        remediation_list={}
+        
+        for row in Comparison_Table:
+
+            if (row[4] == True):
+
+                if (row[3] > row[7]) or (row[3] < row[7]):
+
+                    remediation_list.update({row[0] : row[1]})
+
+        return remediation_list

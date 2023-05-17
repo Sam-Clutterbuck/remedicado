@@ -1,7 +1,7 @@
 #########################################################
 # Plugin : csv_comparison
 # Created by: @Sam-Clutterbuck
-# Version: 0.0.1
+# Version: 0.0.2
 # Last Updated: 27/04/2023
 #
 #
@@ -51,17 +51,63 @@ class Trigger:
         compare = CSV_Comparison(breakdown_path, vuln_path)
         compare.Print_Table()
 
+
+        answer = False
+        response = False
+        while not answer:
+            selection = input(f"Would you like to \n[y]es or [n]o?\n").lower()
+
+            if (selection == "q") or (selection == "quit"):
+                response = False
+                answer = True
+            elif (selection == "y") or (selection == "yes"):
+                response = True
+                answer = True
+            elif (selection == "n") or (selection == "no"):
+                response = False
+                answer = True
+
+            print(f"please select [y]es or [n]o?")
+
+        if response:
+            analysis = CSV_Comparison.Analyse_Results(compare.COMPARISON)
+            print("The following sources have changes in ip counts and should be updated")
+            for row in analysis:
+                print(f"{row} : {analysis[row]}")
+
         return
 
 class Web_GUI:
 
     csv_comparison = Blueprint("csv_comparison", __name__, template_folder='./')
     UPLOAD_FOLDER = "data/uploads/"
+    COMPARISON = {}
+    COMPARISON_FILE = None
+    RESULTS_ANALYSIS = {}
 
-    @csv_comparison.route("/csv_comparison", methods=['GET'])
+    @csv_comparison.route("/csv_comparison", methods=['GET', 'POST'])
     def Csv_Comparison_Start():
 
-        return render_template("./csv_comparison_gui.html")
+        if (request.method == 'POST'):
+
+            if Web_GUI.COMPARISON_FILE is None:
+                return redirect(url_for('csv_comparison.Csv_Comparison_Start'))
+
+            return send_file(f"../{Web_GUI.COMPARISON_FILE}", as_attachment=True)
+        else:
+
+            if Web_GUI.COMPARISON_FILE is None:
+                return render_template("./csv_comparison_gui.html", Comparison_Table=False, Table_Results=None, Analysis=None)
+            
+            else:
+            
+                ## Convert severities to int to allow math
+                for row in range(len(Web_GUI.COMPARISON)):
+                    Web_GUI.COMPARISON[row][2] = int(Web_GUI.COMPARISON[row][2])
+
+                return render_template("./csv_comparison_gui.html", Comparison_Table=True, Table_Results=Web_GUI.COMPARISON, Analysis=Web_GUI.RESULTS_ANALYSIS)
+
+        
     
     
     @csv_comparison.route("/csv_comparison/compare", methods=['POST'])
@@ -94,15 +140,12 @@ class Web_GUI:
 
             compare = CSV_Comparison(Web_GUI.UPLOAD_FOLDER+breakdown_filename, Web_GUI.UPLOAD_FOLDER+top_filename)
             
+            Web_GUI.COMPARISON = compare.COMPARISON
+            Web_GUI.COMPARISON_FILE = compare.COMPARE_FILE
+            Web_GUI.RESULTS_ANALYSIS = CSV_Comparison.Analyse_Results(compare.COMPARISON)
+
             while True:
                 if (compare.RUNNING == False):
-                    return send_file(f"../{compare.COMPARE_FILE}", as_attachment=True)
-            
-
+                    return redirect(url_for('csv_comparison.Csv_Comparison_Start'))
 
         return redirect(url_for('csv_comparison.Csv_Comparison_Start'))
-
-
-
-
-        
