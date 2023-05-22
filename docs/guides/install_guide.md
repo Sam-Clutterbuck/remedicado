@@ -5,6 +5,7 @@ The following guide will show you how to install and set up your own Remedicado 
 
 Before you can install anything you will need to download and set up the following components:
 * The remedicado system from [github](https://github.com/Sam-Clutterbuck/remedicado)
+    * Before downloading you should also decide which plugins you require if any
 * Latest stable release of Python 
 * The packages listed in the [requirements.txt](../../requirements.txt)
 * A MySQL server *(either locally or on your network)*
@@ -39,3 +40,4 @@ Before you can install anything you will need to download and set up the followi
 
 1. Install the Remedicado packages in a central location on your server.
 2. Set up permissions to only allow root access to the `/web`, `/src`, `/data` directories. This will stop unauthenticated users from adding to or editing code or the uploaded / created files.
+3. Install the required plugins to the `/src/plugins` directory and add the plugins verified hash to the `/data/valid_plugins.yaml` file

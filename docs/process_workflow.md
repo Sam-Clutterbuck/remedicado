@@ -37,8 +37,13 @@ Once you have determined the vulnerabilities to report then you need to create a
 	- ips - This is a list of the ip addresses for every affected ip seperated by commas
 ```
 
+e.g. csv
+```
+"source","source_id","name","desc","severity","ips"
+"Tenable","123456","apache vuln","an apache vuln","7.5","10.10.10.10, 10.10.10.30"
+```
+
+
 ###  Importing
 Once you have your csv report containing the required information. You can use the importer tools or webGUI to simply upload a file and have the Remedicado system convert it into the correct format and store the data.
 
-
-### Exporting
