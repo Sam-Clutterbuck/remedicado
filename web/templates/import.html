@@ -1,0 +1,36 @@
+{% extends "base.html" %}  
+{% block title %}import{% endblock %}  
+{% block headings %} <script src="/static/table_href.js"></script> {% endblock %}
+
+
+{% block content %}
+
+
+<div class=" container">
+    <div class="hero">
+        <h1>Import remediation report</h1>
+
+        {% for message in get_flashed_messages() %}
+            <div class="alert">
+                {{message}}
+            </div>
+                
+            {% endfor %}
+
+        <form action="{{url_for('Upload_Import')}}" method="POST" enctype="multipart/form-data">
+            <div class="upload">
+                    <input type="file" id="import_report" name="import_report" accept=".csv">
+                </div>
+            <div class="btn-div">
+                <div class="btn" style="width: min-content; display: inline;">
+                    <button class="btn-segment">Upload</button>
+                    
+                </div>
+                
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}  

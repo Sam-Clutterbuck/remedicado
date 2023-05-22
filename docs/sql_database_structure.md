@@ -1,4 +1,83 @@
 # Remedicado Sql Structure
+
+In order to store the remediation data for Remedicado you will need to install a mySQL server either locally or externally depending on your network configuration and requirements. This sql structure will need to contain the following tables.
+
+To do so here is some SQL code to create the tables:
+
+```
+CREATE TABLE `sources` (
+  `source_id` int NOT NULL AUTO_INCREMENT,
+  `source_name` varchar(60) NOT NULL,
+  PRIMARY KEY (`source_id`),
+  UNIQUE KEY `source_id_UNIQUE` (`source_id`)
+);
+```
+
+```
+CREATE TABLE `ip_list` (
+  `ip_list_id` int NOT NULL AUTO_INCREMENT,
+  `ip_list_address` varchar(16) NOT NULL,
+  PRIMARY KEY (`ip_list_id`),
+  UNIQUE KEY `idip_list_ID_UNIQUE` (`ip_list_id`)
+);
+```
+
+```
+CREATE TABLE `remediation` (
+  `remediation_id` int NOT NULL AUTO_INCREMENT,
+  `remediation_name` varchar(100) NOT NULL,
+  `remediation_desc` longtext NOT NULL,
+  `remediation_sev` FLOAT NOT NULL,
+  `remediation_date_reported` date NOT NULL,
+  `remediation_last_updated` date DEFAULT NULL,
+  `remediation_source` int NOT NULL,
+  `remediation_source_id` int NOT NULL,
+  PRIMARY KEY (`remediation_id`),
+  UNIQUE KEY `remediation_id_UNIQUE` (`remediation_id`),
+  KEY `source_id_idx` (`remediation_source`),
+  CONSTRAINT `source_id` FOREIGN KEY (`remediation_source`) REFERENCES `sources` (`source_id`)
+);
+```
+
+```
+CREATE TABLE `affected_ips` (
+  `remediation_id` int NOT NULL,
+  `ip_list_id` int NOT NULL,
+  `date_reported` date NOT NULL,
+  `remediated` BOOL NOT NULL DEFAULT '0',
+  `last_seen` date DEFAULT NULL,
+  `remediated_previously` BOOL NOT NULL DEFAULT '0',
+  KEY `remediation_ id_idx` (`remediation_id`),
+  KEY `ip_list_id_idx` (`ip_list_id`),
+  CONSTRAINT `ip_list_id` FOREIGN KEY (`ip_list_id`) REFERENCES `ip_list` (`ip_list_id`),
+  CONSTRAINT `remediation_ id` FOREIGN KEY (`remediation_id`) REFERENCES `remediation` (`remediation_id`)
+) ;
+```
+
+```
+CREATE TABLE `uploaded_reports` (
+  `uploaded_reports_id` int NOT NULL AUTO_INCREMENT,
+  `remediation_id` int NOT NULL,
+  `uploaded_reports_filename` varchar(100) NOT NULL,
+  `uploaded_reports_upload_date` date NOT NULL,
+  `uploaded_reports_hash` varchar(256) NOT NULL,
+  PRIMARY KEY (`uploaded_reports_id`),
+  KEY `remediation_id_idx` (`remediation_id`),
+  CONSTRAINT `remediation_id` FOREIGN KEY (`remediation_id`) REFERENCES `remediation` (`remediation_id`)
+);
+```
+
+```
+CREATE TABLE `accounts` (
+  `account_id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `salt` varchar(128) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`account_id`)
+  
+);
+```
+
 ## Remediation table
 The remediation table stores the core remediation data for the program.
 
@@ -43,4 +122,13 @@ To overcome this the source id should be a unique id provided by your source of 
 
 The Source list only contains 2 values
 - `source_id` - This is the unique id of the source referenced in the remediation table
- - `source_name` - This is the human readable name of the source that should be found in the imported report
+- `source_name` - This is the human readable name of the source that should be found in the imported report
+
+### Accounts
+The Accounts table is purely for storing the user accounts used to access the system
+
+The accounts table contains 3 values
+- `username` - the username for the user
+- `salt` - the salt to be added to user password
+- `password` - the hashed and salted password
+

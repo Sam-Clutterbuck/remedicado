@@ -8,19 +8,46 @@
 <div class="container">
     <h1>Remediations</h1>
     <p>add some kinda graphs here later</p>
+
 </div>
 <div></div>
 
 <div class="container">
     <div class="hero">
-        <div class="full-width">
-            <h1>Remediations list</h1>
-            <div class="seperator"></div>
+        <h1>Remediations list</h1>
+        <div class="full-width container-no-gap">
+            
+
+            <form action="{{ url_for('Source_Breakdown')}}" method="POST" enctype="multipart/form-data">
+                <div class="btn-div" style="width: fit-content; margin: 0;">
+                    <div class="btn" style="width: min-content; display: inline;">
+                        <button class="btn-segment">Download Source Breakdown</button>
+                        <select name="source_id" id="source_id" class="btn-segment ">
+            
+                            {% for source in Sources %}
+                    
+                                <option value="{{Sources[source]['source_id']}}">{{Sources[source]['source_name']}}</option>
+                    
+                            {% endfor %}
+                    
+                        </select>
+                    </div>
+                </div>
+            </form>
+
+        
+
+        <div class="shaped">
+            <label for="search_table">Search for Vulnerability:</label>
+            <input type="text" id="search_table" onkeyup="Search_Table()" placeholder="Vulnerability name..">
         </div>
-        <table class="full-width">
+    </div>
+        
+
+        <table id="table" class="full-width">
             <tr>
-                {% for header in headings %}
-                <th>{{ header }}</th>
+                {% for count in range(Header_Length) %}
+                <th onclick="sortTable({{count}})">{{ Headings[count] }}</th>
                 {% endfor %}
             </tr>
             {% for row in data %}
@@ -68,12 +95,12 @@
                 </td>
                 <td>
                     <div class="progress_border" style="width: 80%;">
-                        {% if row[6] >= 80 %}
-                        <div class="progress_bar" style="width:{{row[6]}}%;  background-color: var(--critical)">{{row[7]}}</div>
-                        {% elif row[6] >= 40 %}
-                        <div class="progress_bar" style="width:{{row[6]}}%;  background-color: var(--high)">{{row[7]}}</div>
+                        {% if row[6] >= 100 %}
+                        <div class="progress_bar out_of_policy" style="width:{{row[6]}}%;">{{row[7]}}</div>
+                        {% elif row[6] >= 75 %}
+                        <div class="progress_bar almost_out_of_policy" style="width:{{row[6]}}%;">{{row[7]}}</div>
                         {% else %}
-                        <div class="progress_bar" style="width:{{row[6]}}%;  background-color: var(--med)">{{row[7]}}</div>
+                        <div class="progress_bar in_policy" style="width:{{row[6]}}%;">{{row[7]}}</div>
                         {% endif %}
                     </div>
                 </td>

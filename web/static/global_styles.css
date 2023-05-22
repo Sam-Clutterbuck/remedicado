@@ -26,6 +26,9 @@
     --med: #4b8341;
     --low: #e6e176;
 
+    --out-of-policy: #fbf236;
+    --almost-out-of-policy: #5b6ee1;
+
     --transition-speed: 600ms;
   }
 
@@ -151,6 +154,17 @@ body::-webkit-scrollbar {
     width: 100%;
   }
 
+  div.container-no-gap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: .5rem;
+    flex-wrap: wrap;
+    text-align: left;
+    width: 100%;
+  }
+  
+
   div.stack{
     display: flex;
     flex-direction: column;
@@ -207,7 +221,7 @@ body::-webkit-scrollbar {
     box-shadow: .5rem .5rem 0 .1rem var(--base-100);
     
 
-    &:hover{
+    &:hover {
         cursor: pointer;
         transform: translate(.6rem,.6rem);
         background-color: var(--off-white);
@@ -223,6 +237,76 @@ body::-webkit-scrollbar {
       transform: translate(.6rem,.6rem);
     }
    }
+
+   .btn-segment{
+    padding: 1rem;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--base-100);
+    font-family: 'Space_Mono', monospace;
+    background-color: transparent;
+    border: 0;
+
+    &:hover{
+      cursor: pointer;
+    }
+
+   }
+
+
+   input{
+    font-family: 'Space_Mono', monospace;
+   }
+
+   textarea{
+    font-family: 'Space_Mono', monospace;
+   }
+
+
+   .upload input {
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    width: 100%;
+  }
+  .upload input::-webkit-file-upload-button{
+    background-color: transparent;
+    border:none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 1rem;
+    margin-right: 1rem;
+    text-decoration: none;
+    color: var(--base-100);
+    font-family: 'Space_Mono', monospace;
+    background-color: var(--comp-lt);
+    border: .2rem solid var(--base-100);
+    border-radius: 2rem 2rem 0rem 2rem;
+    box-shadow: .5rem .5rem 0 .1rem var(--base-100);
+
+  }
+  .upload input::-webkit-file-upload-button:hover {
+    cursor: pointer;
+    transform: translate(.6rem,.6rem);
+    background-color: var(--off-white);
+    box-shadow: -.4rem -.4rem 0 .3rem var(--base-100);
+  }
+  .upload input::-webkit-file-upload-button:focus{
+      outline:none;
+  }
+  .uploadinput:focus {
+      outline: none;
+  }
+
+  .shaped {
+    padding: 1rem 3rem;
+    border: solid 1px var(--off-black);
+    border-radius: 2rem 2rem 0rem 2rem;
+    box-shadow: .2rem .2rem 0 .1rem var(--off-black);
+    display: inline;
+    margin-bottom: 3rem;
+  }
 
    .full-width{
     width: 100%;
@@ -255,6 +339,13 @@ body::-webkit-scrollbar {
     font-size: 1.5rem;
     color: var(--base-50);
     border-bottom: .2rem solid var(--base-50);
+    word-wrap: break-word;
+
+    &:hover{
+      cursor: pointer;
+      background-color: var(--base-90);
+      border-radius: 3rem 3rem 3rem 0;
+    }
   }
 
   td{
@@ -305,6 +396,22 @@ body::-webkit-scrollbar {
   .low{
     color: var(--off-black);
     background-color: var(--low);
+  }
+
+  .out_of_policy{
+    background-color: var(--out-of-policy) !important;
+    color: var(--off-black);
+    font-weight: 700;
+  }
+
+  .almost_out_of_policy{
+    background-color: var(--almost-out-of-policy) !important;
+    color: var(--off-white);
+  }
+
+  .in_policy{
+    background-color: var(--med) !important;
+    color: var(--off-black);
   }
 
   .progress_border{
@@ -361,4 +468,80 @@ body::-webkit-scrollbar {
     box-shadow: .2rem .2rem 0 .1rem var(--off-black);
     display: inline;
 
+  }
+
+  .alert{
+    margin: 1rem 0;
+    padding: .5rem;
+    width: 100%;
+    height: 1.5rem;
+    background-color: var(--critical);
+    color: var(--off-white);
+    font-size: 1rem;
+  }
+
+  form{
+    margin-bottom: 3rem;
+  }
+
+  .collapse{
+    cursor: pointer;
+    display: block;
+    width: 100%;
+  }
+
+  .collapse + input{
+    display: none; /* hide the checkboxes */
+  }
+  .collapse + input + div.expander{
+    display:none;
+  }
+  .collapse + input:checked + div.expander{
+    margin-top: 3rem;
+    display:block;
+  }
+
+  .plugin{
+    width: 25%;
+    padding: 2rem;
+    background-color: var(--base-60);
+    box-shadow: 1rem 1rem 0 .5rem var(--base-100);
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+
+  }
+
+  .plugin_name{
+    width: 100%;
+    padding: 1rem;
+    overflow-wrap: break-word;}
+
+  .login_form{
+    padding: 4rem;
+  }
+
+  .login_form *{
+    display: flex;
+    margin: 1rem;
+  }
+
+  .login_form input{
+    background-color: var(--base-80);
+    color: var(--off-white);
+    border-color: var(--base-100);
+    font-size: 1rem;
+
+    &::placeholder {
+      color: var(--off-white);
+      opacity: 1;
+    }
+
+  }
+
+  .login_box {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 5rem;
+    background-color: var(--base-60);
+    box-shadow: .5rem .5rem 10rem -.5rem var(--base-90);
   }

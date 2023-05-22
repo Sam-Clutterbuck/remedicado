@@ -1,5 +1,6 @@
 {% extends "base.html" %}  
 {% block title %}{{ Remediation_Name }}{% endblock %}  
+{% block headings %} <script src="/static/table_href.js"></script> {% endblock %}
 
 {% block content %}
 
@@ -8,11 +9,12 @@
     <div class="container">
         <div class="title side-by-side">
             <div class="return">
-                <a href="{{ url_for('Remediations_List')}}#{{ID}}"><img src="/static/assets/icons/back.svg" alt="back icon"> <h6>Remediation Details</h6></a>
+                <a href="{{ url_for('Remediations_List')}}#{{ID}}"><img src="/static/assets/icons/back.svg" alt="back icon"> <h6>Remediation List</h6></a>
                 
             </div>
             <h1>{{ Remediation_Name }}</h1>
             <p><span class="bold">Reported: </span>{{Date_Added}} |  <span class="bold">Last updated: </span>{{Last_Updated}}</p>
+            <p><span class="bold">{{Remediation_Source}}:</span> {{Remediation_Source_Id}}</p>
         </div>
 
         {% if Remediation_Sev >= 9 %}
@@ -53,12 +55,12 @@
             <div>
                 <p class="close-margin bold">Policy Status</p>
                 <div class="progress_border">
-                    {% if Policy_Percent >= 80 %}
-                    <div class="progress_bar" style="width:{{Policy_Percent}}%;  background-color: var(--critical)">{{Policy_Days}}</div>
-                    {% elif Policy_Percent >= 40 %}
-                    <div class="progress_bar" style="width:{{Policy_Percent}}%;  background-color: var(--high)">{{Policy_Days}}</div>
+                    {% if Policy_Percent >= 100 %}
+                    <div class="progress_bar out_of_policy" style="width:{{Policy_Percent}}%;">{{Policy_Days}}</div>
+                    {% elif Policy_Percent >= 75 %}
+                    <div class="progress_bar almost_out_of_policy" style="width:{{Policy_Percent}}%;">{{Policy_Days}}</div>
                     {% else %}
-                    <div class="progress_bar" style="width:{{Policy_Percent}}%;  background-color: var(--med)">{{Policy_Days}}</div>
+                    <div class="progress_bar in_policy" style="width:{{Policy_Percent}}%;">{{Policy_Days}}</div>
                     {% endif %}
                 </div>
             </div>
@@ -75,30 +77,66 @@
         </div>
     
         <div class="hero side-by-side">
-            <h3 class="close-margin">Vulnerability Reports</h3>
+            <h3 class="close-margin" id="vuln_reports">Vulnerability Reports</h3>
 
-            <form action="#">
-                <input type="file" id="myFile" name="filename">
-                <button type="submit" class="btn" href="#" target="_blank" style="font-size: 1rem;">Upload Vulnerability Report</button>
+            {% for message in get_flashed_messages() %}
+            <div class="alert">
+                {{message}}
+            </div>
                 
-              </form>
+            {% endfor %}
+
+            <form action="{{ url_for('Upload_Report', ID=ID)}}" method="POST" enctype="multipart/form-data">
+                <div class="upload">
+                        <input type="file" id="vuln_report" name="vuln_report" accept=".pdf">
+                    </div>
+                <div class="btn-div">
+                    <div class="btn" style="width: min-content; display: inline;">
+                        <button class="btn-segment">Upload Vulnerability Report</button>
+                        
+                    </div>
+                   
+                </div>
+            </form>
 
             
             <table class="full-width">
                 <tr>
                     <th>Report</th>
                     <th>Date Added</th>
+                    <th>Sha256 Hash</th>
+                    <th>Download</th>
                 </tr>
                 <tr>
+                    {% for file in Uploaded_Files %}
+                    
                     <td>
-                        <a>LINK</a>
+                        <a>{{Uploaded_Files[file]['uploaded_reports_filename']}}</a>
                     </td>
-                    <td>DATE</td>
+                    <td>{{Uploaded_Files[file]['uploaded_reports_upload_date']}}</td>
+                    <td style="overflow-wrap: break-word;">{{Uploaded_Files[file]['uploaded_reports_hash']}}</td>
+                    <td>
+                        <a href="{{url_for('Report_Download', ID=ID, Report_Id=Uploaded_Files[file]['uploaded_reports_id'])}}">
+                            <img src="/static/assets/icons/download.svg" alt="download icon">
+                        </a>
+                        <label class="collapse" for="_{{Uploaded_Files[file]['uploaded_reports_id']}}" style="display: inline;"><img src="/static/assets/icons/delete.svg" alt="delete icon"></label>
+                        <input id="_{{Uploaded_Files[file]['uploaded_reports_id']}}" type="checkbox">    
+                        <div class="expander" style="margin-bottom: 3rem;">
+                            <form action="{{url_for('Delete_Report', ID=ID, Report_Id=Uploaded_Files[file]['uploaded_reports_id'])}}" method="POST">
+                                <p>Are you sure you want to delete {{Uploaded_Files[file]['uploaded_reports_filename']}}?</p>
+                                <br>
+                                <input class="btn" type="submit" value="Delete">
+                            </form>
+                        </div>
+                    </td>
+
+                    {% endfor %}
                 </tr>
             </table>
         </div>
     </div>
 
+    <!--
     <div class="full-width">
         <div class="cta">
             <div class="container">
@@ -111,13 +149,31 @@
             </div>
         </div>
     </div>
+    -->
 
     <div class="hero">
-        <h3 class="close-margin">Ip List</h3>
-        <table style="table-layout: auto;">
+        <div class="container">
+            <h3 class="close-margin" Id="ip_list">Ip List</h3>
+        
+            <div>
+                <label class="collapse btn" for="_ips">Remediate ips</label>
+                <input id="_ips" type="checkbox"> 
+                <div class="expander">
+                    <form action="{{url_for('Remediate_Ips', ID=ID)}}" method="POST">
+                        <p><label for="selected_ips">list ips to remediate (seperate by comma):</label></p>
+                        <textarea id="selected_ips" name="selected_ips" rows="4" cols="50" placeholder="xxx.xxx.xxx.xxx (seperate by comma)"></textarea>
+                        <br>
+                        <input class="btn" type="submit" value="Remediate">
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+
+        <table style="table-layout: auto;" id="table">
             <tr>
-                {% for header in Ip_Headers %}
-                <th>{{ header }}</th>
+                {% for count in range(Ip_Header_Length) %}
+                <th onclick="sortTable({{count}})">{{ Ip_Headers[count] }}</th>
                 {% endfor %}
             </tr>
             {% for row in Ip_Data %}
@@ -142,6 +198,31 @@
             </tr>
             {% endfor %}
         </table>
+    </div>
+
+
+    <div class="full-width">
+        <div class="cta critical">
+            <div class="container">
+
+                <div class="stack">
+                    <div class="btn-div">
+                        <a type="button" class="btn" href="{{ url_for('Edit_Remediation_Details', ID=ID)}}">Edit</a>
+                    </div>
+
+                    <label class="collapse btn" for="_delete" style="display: inline;"><img src="/static/assets/icons/delete.svg" alt="delete icon"> Delete Remediation</label>
+                    <input id="_delete" type="checkbox">    
+                    <div class="expander" style="margin-bottom: 3rem;">
+                        <form action="{{ url_for('Delete_Remediation', ID=ID)}}" method="POST">
+                            <h4>Are you sure you want to delete '{{ Remediation_Name }}'?</h4>
+                            <br>
+                            <input class="btn" type="submit" value="Delete">
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
 </div>
